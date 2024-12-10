@@ -9,7 +9,7 @@ module.exports = {
         primary: "#212121",
         secondary: "#2F2F2F",
         cellPrimary: "#000",
-        cellSecondary: "#fff"
+        cellSecondary: "#ffffffe0"
       },
       height:{
         "custom-30": "30rem"

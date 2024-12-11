@@ -1,0 +1,29 @@
+export const BorderChess = () => {
+  const columns = ["A", "B", "C", "D", "E", "F", "G", "H"];
+  const rows = [8, 7, 6, 5, 4, 3, 2, 1];
+
+  return (
+    <div className="absolute w-full h-full p-8">
+      <div className="absolute text-white flex top-0">
+        {columns.map((x) => (
+          <div className="p-columns">{x}</div>
+        ))}
+      </div>
+      <div className="absolute text-white flex bottom-0">
+        {columns.map((x) => (
+          <div className="p-columns">{x}</div>
+        ))}
+      </div>
+      <div className="absolute text-white left-0">
+        {rows.map((x) => (
+          <div className="p-rows">{x}</div>
+        ))}
+      </div>
+      <div className="absolute text-white right-0">
+        {rows.map((x) => (
+          <div className="p-rows">{x}</div>
+        ))}
+      </div>
+    </div>
+  );
+};

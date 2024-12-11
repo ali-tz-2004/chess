@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { BorderChess } from "./BorderChess";
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
@@ -9,8 +10,6 @@ interface CellType {
 
 export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
-  const columns = ["A", "B", "C", "D", "E", "F", "G", "H"];
-  const rows = [1, 2, 3, 4, 5, 6, 7, 8];
 
   useEffect(() => {
     let tempList: CellType[][] = [];
@@ -36,37 +35,13 @@ export const Chess = () => {
   }, []);
 
   return (
-    <div className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative">
+    <div className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative md:scale-100 scale-50">
       {cells.map((cellChildren) =>
         cellChildren.map((x) => (
-          <div
-            key={x.id}
-            className={`${x.color} w-full h-full text-green-600`}
-          ></div>
+          <div key={x.id} className={`${x.color} w-full h-full`}></div>
         ))
       )}
-      <div className="absolute w-full h-full px-8 py-8">
-        <div className="absolute text-white flex top-0">
-          {columns.map((x) => (
-            <div className="columns">{x}</div>
-          ))}
-        </div>
-        <div className="absolute text-white flex bottom-0">
-          {columns.map((x) => (
-            <div className="columns">{x}</div>
-          ))}
-        </div>
-        <div className="absolute text-white left-0">
-          {rows.map((x) => (
-            <div className="rows">{x}</div>
-          ))}
-        </div>
-        <div className="absolute text-white right-0">
-          {rows.map((x) => (
-            <div className="rows">{x}</div>
-          ))}
-        </div>
-      </div>
+      <BorderChess />
     </div>
   );
 };

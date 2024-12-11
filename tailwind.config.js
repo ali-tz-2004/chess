@@ -19,7 +19,11 @@ module.exports = {
       },
       gridRow:{
         8:"grid-template-rows: repeat(8, minmax(0, 1fr));"
-      }
+      },
+      padding: {
+        columns: '2px 1.3rem',
+        rows: '0.88rem 11px',
+      },
     },
   },
   plugins: [],

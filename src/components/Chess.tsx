@@ -65,7 +65,10 @@ export const Chess = () => {
   }, []);
 
   return (
-    <div className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative md:scale-100 scale-50">
+    <div
+      className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative 
+    2xl:scale-150 lg:scale-100 md:scale-50 scale-75"
+    >
       {cells.map((cellChildren) =>
         cellChildren.map((x) => (
           <div key={x.id} className={`${x.color} w-full h-full`}>

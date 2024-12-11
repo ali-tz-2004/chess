@@ -6,22 +6,22 @@ export const BorderChess = () => {
     <div className="absolute w-full h-full p-8">
       <div className="absolute text-white flex top-0">
         {columns.map((x) => (
-          <div className="p-columns">{x}</div>
+          <div className="md:p-columns p-columns-mobil">{x}</div>
         ))}
       </div>
       <div className="absolute text-white flex bottom-0">
         {columns.map((x) => (
-          <div className="p-columns">{x}</div>
+          <div className="md:p-columns p-columns-mobil">{x}</div>
         ))}
       </div>
       <div className="absolute text-white left-0">
         {rows.map((x) => (
-          <div className="p-rows">{x}</div>
+          <div className="md:p-rows p-rows-mobil">{x}</div>
         ))}
       </div>
       <div className="absolute text-white right-0">
         {rows.map((x) => (
-          <div className="p-rows">{x}</div>
+          <div className="md:p-rows p-rows-mobil">{x}</div>
         ))}
       </div>
     </div>

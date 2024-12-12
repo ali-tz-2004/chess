@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { BorderChess } from "./BorderChess";
 import { ChessPiece } from "./ChessPiece";
 import { Images } from "../assets/images/images";
+import Draggable from "react-draggable";
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
@@ -10,6 +11,7 @@ interface CellType {
   color: cellColorType;
   piece: keyof (typeof Images)["black"] | null;
   colorPiece: keyof typeof Images | null;
+  selected: boolean;
 }
 
 const initialPiecePlacement: (keyof (typeof Images)["black"] | null)[][] = [
@@ -33,6 +35,31 @@ const initialPieceColors: (keyof typeof Images | null)[] = [
 
 export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
+  const [turn, setTurn] = useState<keyof typeof Images>("white");
+
+  const changePieceHandler = (
+    id: number,
+    firstIndex: number,
+    secondIndex: number,
+    colorPrice: keyof typeof Images | null
+  ) => {
+    debugger;
+    let cell = cells.filter((x) => x.filter((y) => y.id === id));
+
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (firstIndex === i && secondIndex === j) continue;
+        cell[i][j].selected = false;
+      }
+    }
+    setCells(cell);
+
+    if (cell[firstIndex][secondIndex].colorPiece === turn) {
+      cell[firstIndex][secondIndex].selected =
+        !cell[firstIndex][secondIndex].selected;
+      setCells(cell);
+    }
+  };
 
   useEffect(() => {
     let tempList: CellType[][] = [];
@@ -54,6 +81,7 @@ export const Chess = () => {
           color: color,
           piece: piece,
           colorPiece: colorPiece,
+          selected: false,
         };
 
         tempList[i].push(temp);
@@ -66,14 +94,28 @@ export const Chess = () => {
 
   return (
     <div
-      className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative 
-    2xl:scale-150 lg:scale-100 md:scale-50 scale-75"
+      className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative
+    2xl:scale-150 lg:scale-100 md:scale-50 scale-75 "
     >
-      {cells.map((cellChildren) =>
-        cellChildren.map((x) => (
-          <div key={x.id} className={`${x.color} w-full h-full`}>
+      {cells.map((cellChildren, firstIndex) =>
+        cellChildren.map((x, secondIndex) => (
+          <div key={x.id} className={`${x.color} w-full h-full z-10`}>
             {x.piece && x.colorPiece && (
-              <ChessPiece piece={x.piece} color={x.colorPiece} />
+              <div
+                className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${
+                  x.selected ? "bg-blue-400" : ""
+                }`}
+                onClick={() =>
+                  changePieceHandler(
+                    x.id,
+                    firstIndex,
+                    secondIndex,
+                    x.colorPiece
+                  )
+                }
+              >
+                <ChessPiece piece={x.piece} color={x.colorPiece} />
+              </div>
             )}
           </div>
         ))

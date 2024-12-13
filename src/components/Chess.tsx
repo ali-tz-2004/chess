@@ -12,6 +12,7 @@ interface CellType {
   piece: keyof (typeof Images)["black"] | null;
   colorPiece: keyof typeof Images | null;
   selected: boolean;
+  isAllowMove: boolean;
 }
 
 const initialPiecePlacement: (keyof (typeof Images)["black"] | null)[][] = [
@@ -37,26 +38,43 @@ export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
   const [turn, setTurn] = useState<keyof typeof Images>("white");
 
+  const countRow = 8;
+  const countColumn = 8;
+
   const changePieceHandler = (
     id: number,
     firstIndex: number,
     secondIndex: number,
     colorPrice: keyof typeof Images | null
   ) => {
-    debugger;
     let cell = cells.filter((x) => x.filter((y) => y.id === id));
 
-    for (let i = 0; i < 8; i++) {
-      for (let j = 0; j < 8; j++) {
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
         if (firstIndex === i && secondIndex === j) continue;
+        cell[i][j].isAllowMove = false;
         cell[i][j].selected = false;
       }
     }
     setCells(cell);
 
-    if (cell[firstIndex][secondIndex].colorPiece === turn) {
-      cell[firstIndex][secondIndex].selected =
-        !cell[firstIndex][secondIndex].selected;
+    const cellSelected = cell[firstIndex][secondIndex];
+
+    if (cellSelected.colorPiece === turn) {
+      cellSelected.selected = !cellSelected.selected;
+
+      switch (cellSelected.colorPiece) {
+        case "black":
+          break;
+        case "white":
+          if (firstIndex === 6) {
+            cell[firstIndex - 1][secondIndex].isAllowMove =
+              cellSelected.selected;
+            cell[firstIndex - 2][secondIndex].isAllowMove =
+              cellSelected.selected;
+          }
+          break;
+      }
       setCells(cell);
     }
   };
@@ -65,9 +83,9 @@ export const Chess = () => {
     let tempList: CellType[][] = [];
     let id = 1;
 
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < countRow; i++) {
       tempList[i] = [];
-      for (let j = 0; j < 8; j++) {
+      for (let j = 0; j < countColumn; j++) {
         let color: cellColorType =
           (j % 2) - (i % 2 === 0 ? 1 : 0) === 0
             ? "bg-cellPrimary"
@@ -82,6 +100,7 @@ export const Chess = () => {
           piece: piece,
           colorPiece: colorPiece,
           selected: false,
+          isAllowMove: false,
         };
 
         tempList[i].push(temp);
@@ -99,7 +118,17 @@ export const Chess = () => {
     >
       {cells.map((cellChildren, firstIndex) =>
         cellChildren.map((x, secondIndex) => (
-          <div key={x.id} className={`${x.color} w-full h-full z-10`}>
+          <div
+            key={x.id}
+            className={`${
+              x.color
+            } w-full h-full z-10 relative flex items-center justify-center ${
+              x.isAllowMove ? "cursor-pointer" : ""
+            } `}
+          >
+            {x.isAllowMove ? (
+              <div className="absolute w-2 h-2 bg-blue-400 rounded-xl"></div>
+            ) : null}
             {x.piece && x.colorPiece && (
               <div
                 className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${

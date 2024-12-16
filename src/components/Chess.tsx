@@ -40,13 +40,25 @@ export const Chess = () => {
   const countRow = 8;
   const countColumn = 8;
 
+  const clearAllowMoveAndSelected = () => {
+    let cell = [...cells];
+
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
+        cell[i][j].isAllowMove = false;
+        cell[i][j].selected = false;
+      }
+    }
+    setCells(cell);
+  };
+
   const changePieceHandler = (
     id: number,
     firstIndex: number,
     secondIndex: number,
     colorPrice: keyof typeof Images | null
   ) => {
-    let cell = cells.filter((x) => x.filter((y) => y.id === id));
+    let cell = [...cells];
 
     for (let i = 0; i < countRow; i++) {
       for (let j = 0; j < countColumn; j++) {
@@ -64,6 +76,42 @@ export const Chess = () => {
 
       switch (cellSelected.colorPiece) {
         case "black":
+          switch (cellSelected.piece) {
+            case "Pawn":
+              if (
+                firstIndex === 1 &&
+                !cell[firstIndex + 1][secondIndex].piece &&
+                !cell[firstIndex + 2][secondIndex].piece
+              ) {
+                cell[firstIndex + 1][secondIndex].isAllowMove =
+                  cellSelected.selected;
+                cell[firstIndex + 2][secondIndex].isAllowMove =
+                  cellSelected.selected;
+              }
+              if (!cell[firstIndex + 1][secondIndex].piece) {
+                cell[firstIndex + 1][secondIndex].isAllowMove =
+                  cellSelected.selected;
+              }
+              if (
+                secondIndex !== 0 &&
+                cell[firstIndex + 1][secondIndex - 1].piece &&
+                cell[firstIndex + 1][secondIndex - 1].colorPiece === "white"
+              ) {
+                cell[firstIndex + 1][secondIndex - 1].isAllowMove =
+                  cellSelected.selected;
+              }
+              if (
+                secondIndex !== 7 &&
+                cell[firstIndex + 1][secondIndex + 1].piece &&
+                cell[firstIndex + 1][secondIndex + 1].colorPiece === "white"
+              ) {
+                cell[firstIndex + 1][secondIndex + 1].isAllowMove =
+                  cellSelected.selected;
+              }
+              break;
+            default:
+              break;
+          }
           break;
         case "white":
           switch (cellSelected.piece) {
@@ -83,7 +131,7 @@ export const Chess = () => {
                   cellSelected.selected;
               }
               if (
-                secondIndex != 0 &&
+                secondIndex !== 0 &&
                 cell[firstIndex - 1][secondIndex - 1].piece &&
                 cell[firstIndex - 1][secondIndex - 1].colorPiece === "black"
               ) {
@@ -91,7 +139,7 @@ export const Chess = () => {
                   cellSelected.selected;
               }
               if (
-                secondIndex != 7 &&
+                secondIndex !== 7 &&
                 cell[firstIndex - 1][secondIndex + 1].piece &&
                 cell[firstIndex - 1][secondIndex + 1].colorPiece === "black"
               ) {
@@ -140,19 +188,33 @@ export const Chess = () => {
     setCells(tempList);
   }, []);
 
+  const [selected, setSelected] = useState<number[]>([]);
+
   const movedHandler = (
     isAllowMove: boolean,
     firstIndex: number,
     secondIndex: number
   ): void => {
     if (isAllowMove) {
+      const cellsCopy = [...cells];
+      cellsCopy[firstIndex][secondIndex].piece =
+        cellsCopy[selected[0]][selected[1]].piece;
+      cellsCopy[selected[0]][selected[1]].piece = null;
+      cellsCopy[firstIndex][secondIndex].colorPiece = turn;
+      setCells(cellsCopy);
+      clearAllowMoveAndSelected();
+      setTurn(turn === "white" ? "black" : "white");
+    } else {
+      setSelected([firstIndex, secondIndex]);
     }
   };
 
   return (
     <div
-      className="h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative
-    2xl:scale-150 lg:scale-100 md:scale-50 scale-75"
+      className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative
+    2xl:scale-150 lg:scale-100 md:scale-50 scale-75  ${
+      turn === "black" ? "rotate-180" : ""
+    }`}
     >
       {cells.map((cellChildren, firstIndex) =>
         cellChildren.map((x, secondIndex) => (
@@ -166,7 +228,9 @@ export const Chess = () => {
             onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
           >
             {x.isAllowMove ? (
-              <div className="absolute w-2 h-2 bg-blue-400 rounded-xl"></div>
+              <div
+                className={`absolute w-2 h-2 bg-blue-400 rounded-xl z-10 `}
+              ></div>
             ) : null}
             {x.piece && x.colorPiece && (
               <div
@@ -182,13 +246,15 @@ export const Chess = () => {
                   )
                 }
               >
-                <ChessPiece piece={x.piece} color={x.colorPiece} />
+                <div className={`${turn === "black" ? "rotate-180" : ""}`}>
+                  <ChessPiece piece={x.piece} color={x.colorPiece} />
+                </div>
               </div>
             )}
           </div>
         ))
       )}
-      <BorderChess />
+      <BorderChess turn={turn} />
     </div>
   );
 };

@@ -212,9 +212,7 @@ export const Chess = () => {
   return (
     <div
       className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative
-    2xl:scale-150 lg:scale-100 md:scale-50 scale-75  ${
-      turn === "black" ? "rotate-180" : ""
-    }`}
+    2xl:scale-150 lg:scale-100 md:scale-50 scale-75 `}
     >
       {cells.map((cellChildren, firstIndex) =>
         cellChildren.map((x, secondIndex) => (
@@ -246,15 +244,13 @@ export const Chess = () => {
                   )
                 }
               >
-                <div className={`${turn === "black" ? "rotate-180" : ""}`}>
-                  <ChessPiece piece={x.piece} color={x.colorPiece} />
-                </div>
+                <ChessPiece piece={x.piece} color={x.colorPiece} />
               </div>
             )}
           </div>
         ))
       )}
-      <BorderChess turn={turn} />
+      <BorderChess />
     </div>
   );
 };

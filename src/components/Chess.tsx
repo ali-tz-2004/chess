@@ -102,11 +102,86 @@ export const Chess = () => {
       }
     };
 
+    const handleRookMoves = (enemyColor: keyof typeof Images) => {
+      for (let i = firstIndex - 1; i >= 0; i--) {
+        if (
+          updatedCells[i][secondIndex].piece &&
+          updatedCells[i][secondIndex].colorPiece !== enemyColor
+        ) {
+          break;
+        }
+        updatedCells[i][secondIndex].isAllowMove = selectedCell.selected;
+
+        if (
+          updatedCells[i][secondIndex].piece &&
+          updatedCells[i][secondIndex].colorPiece === enemyColor
+        )
+          break;
+      }
+
+      for (let i = firstIndex + 1; i < 8; i++) {
+        if (
+          updatedCells[i][secondIndex].piece &&
+          updatedCells[i][secondIndex].colorPiece !== enemyColor
+        ) {
+          break;
+        }
+
+        updatedCells[i][secondIndex].isAllowMove = selectedCell.selected;
+
+        if (
+          updatedCells[i][secondIndex].piece &&
+          updatedCells[i][secondIndex].colorPiece === enemyColor
+        )
+          break;
+      }
+
+      for (let i = secondIndex + 1; i < 8; i++) {
+        if (
+          updatedCells[firstIndex][i].piece &&
+          updatedCells[firstIndex][i].colorPiece !== enemyColor
+        ) {
+          break;
+        }
+
+        updatedCells[firstIndex][i].isAllowMove = selectedCell.selected;
+
+        if (
+          updatedCells[firstIndex][i].piece &&
+          updatedCells[firstIndex][i].colorPiece === enemyColor
+        )
+          break;
+      }
+
+      for (let i = secondIndex - 1; i >= 0; i--) {
+        if (
+          updatedCells[firstIndex][i].piece &&
+          updatedCells[firstIndex][i].colorPiece !== enemyColor
+        ) {
+          break;
+        }
+
+        updatedCells[firstIndex][i].isAllowMove = selectedCell.selected;
+
+        if (
+          updatedCells[firstIndex][i].piece &&
+          updatedCells[firstIndex][i].colorPiece === enemyColor
+        )
+          break;
+      }
+    };
+
     if (selectedCell.piece === "Pawn") {
       if (turn === "black") {
         handlePawnMoves(1, 1, "white");
       } else if (turn === "white") {
         handlePawnMoves(-1, 6, "black");
+      }
+    } else if (selectedCell.piece === "Rook") {
+      if (turn === "black") {
+        handleRookMoves("white");
+      } else if (turn === "white") {
+        handleRookMoves("black");
       }
     }
 
@@ -165,13 +240,21 @@ export const Chess = () => {
       cellsCopy[firstIndex][secondIndex].colorPiece = turn;
       clearAllowMoveAndSelected();
 
-      if (firstIndex === 0 && turn === "white") {
+      if (
+        firstIndex === 0 &&
+        turn === "white" &&
+        cellsCopy[firstIndex][secondIndex].piece === "Pawn"
+      ) {
         cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
         setCells(cellsCopy);
         return;
       }
 
-      if (firstIndex === 7 && turn === "black") {
+      if (
+        firstIndex === 7 &&
+        turn === "black" &&
+        cellsCopy[firstIndex][secondIndex].piece === "Pawn"
+      ) {
         cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
         setCells(cellsCopy);
         return;

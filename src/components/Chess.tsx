@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BorderChess } from "./BorderChess";
 import { ChessPiece } from "./ChessPiece";
 import { Images } from "../assets/images/images";
+import Draggable from "react-draggable";
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
@@ -12,6 +13,7 @@ interface CellType {
   colorPiece: keyof typeof Images | null;
   selected: boolean;
   isAllowMove: boolean;
+  isUpdatePice: boolean;
 }
 
 const initialPiecePlacement: (keyof (typeof Images)["black"] | null)[][] = [
@@ -33,6 +35,13 @@ const initialPieceColors: (keyof typeof Images | null)[] = [
   "white",
 ];
 
+const convertPawPiece: (keyof (typeof Images)["black"])[] = [
+  "Rook",
+  "Knight",
+  "Bishop",
+  "Queen",
+];
+
 export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
   const [turn, setTurn] = useState<keyof typeof Images>("white");
@@ -52,13 +61,21 @@ export const Chess = () => {
     setCells(cell);
   };
 
-  const changePieceHandler = (
-    id: number,
-    firstIndex: number,
-    secondIndex: number,
-    colorPrice: keyof typeof Images | null
-  ) => {
+  const checkUpdatePice = (): boolean => {
     let cell = [...cells];
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
+        if (cell[i][j].isUpdatePice) return true;
+      }
+    }
+
+    return false;
+  };
+
+  const changePieceHandler = (firstIndex: number, secondIndex: number) => {
+    let cell = [...cells];
+
+    if (cell[firstIndex][secondIndex].isUpdatePice || checkUpdatePice()) return;
 
     for (let i = 0; i < countRow; i++) {
       for (let j = 0; j < countColumn; j++) {
@@ -178,6 +195,7 @@ export const Chess = () => {
           colorPiece: colorPiece,
           selected: false,
           isAllowMove: false,
+          isUpdatePice: false,
         };
 
         tempList[i].push(temp);
@@ -201,18 +219,43 @@ export const Chess = () => {
         cellsCopy[selected[0]][selected[1]].piece;
       cellsCopy[selected[0]][selected[1]].piece = null;
       cellsCopy[firstIndex][secondIndex].colorPiece = turn;
-      setCells(cellsCopy);
       clearAllowMoveAndSelected();
+
+      if (firstIndex === 0 && turn === "white") {
+        cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
+        setCells(cellsCopy);
+        return;
+      }
+
+      if (firstIndex === 7 && turn === "black") {
+        cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
+        setCells(cellsCopy);
+        return;
+      }
+
+      setCells(cellsCopy);
       setTurn(turn === "white" ? "black" : "white");
     } else {
       setSelected([firstIndex, secondIndex]);
     }
   };
 
+  function updatePow(
+    firstIndex: number,
+    secondIndex: number,
+    piece: keyof (typeof Images)["black"]
+  ): void {
+    const cellsCopy = [...cells];
+    cells[firstIndex][secondIndex].piece = piece;
+    cells[firstIndex][secondIndex].isUpdatePice = false;
+
+    setTurn(turn === "white" ? "black" : "white");
+    setCells(cellsCopy);
+  }
+
   return (
     <div
-      className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 relative
-    2xl:scale-150 lg:scale-100 md:scale-50 scale-75 `}
+      className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative `}
     >
       {cells.map((cellChildren, firstIndex) =>
         cellChildren.map((x, secondIndex) => (
@@ -220,33 +263,36 @@ export const Chess = () => {
             key={x.id}
             className={`${
               x.bgColor
-            } w-full h-full z-10 relative flex items-center justify-center  ${
+            } w-full h-full flex items-center justify-center relative ${
               x.isAllowMove ? "cursor-pointer" : ""
             } `}
             onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
           >
             {x.isAllowMove ? (
-              <div
-                className={`absolute w-2 h-2 bg-blue-400 rounded-xl z-10 `}
-              ></div>
+              <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
             ) : null}
             {x.piece && x.colorPiece && (
               <div
                 className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${
                   x.selected ? "bg-blue-400" : ""
                 }`}
-                onClick={() =>
-                  changePieceHandler(
-                    x.id,
-                    firstIndex,
-                    secondIndex,
-                    x.colorPiece
-                  )
-                }
+                onClick={() => changePieceHandler(firstIndex, secondIndex)}
               >
                 <ChessPiece piece={x.piece} color={x.colorPiece} />
               </div>
             )}
+            {x.isUpdatePice ? (
+              <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
+                {convertPawPiece.map((y) => (
+                  <div
+                    onClick={() => updatePow(firstIndex, secondIndex, y)}
+                    className="pointer"
+                  >
+                    <ChessPiece piece={y} color={turn} />
+                  </div>
+                ))}
+              </div>
+            ) : null}
           </div>
         ))
       )}

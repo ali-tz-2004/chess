@@ -102,87 +102,37 @@ export const Chess = () => {
       }
     };
 
-    const handleRookMoves = (enemyColor: keyof typeof Images) => {
-      for (let i = firstIndex - 1; i >= 0; i--) {
-        if (
-          updatedCells[i][secondIndex].piece &&
-          updatedCells[i][secondIndex].colorPiece !== enemyColor
-        ) {
-          break;
-        }
-        updatedCells[i][secondIndex].isAllowMove = selectedCell.selected;
+    const handleRookMoves = (
+      enemyColor: keyof typeof Images,
+      startIndex: number,
+      endIndex: number,
+      isRow: boolean,
+      step: number
+    ) => {
+      for (let i = startIndex; i !== endIndex; i += step) {
+        const cell = isRow
+          ? updatedCells[i][secondIndex]
+          : updatedCells[firstIndex][i];
 
-        if (
-          updatedCells[i][secondIndex].piece &&
-          updatedCells[i][secondIndex].colorPiece === enemyColor
-        )
-          break;
-      }
+        if (cell.piece && cell.colorPiece !== enemyColor) break;
 
-      for (let i = firstIndex + 1; i < 8; i++) {
-        if (
-          updatedCells[i][secondIndex].piece &&
-          updatedCells[i][secondIndex].colorPiece !== enemyColor
-        ) {
-          break;
-        }
+        cell.isAllowMove = selectedCell.selected;
 
-        updatedCells[i][secondIndex].isAllowMove = selectedCell.selected;
-
-        if (
-          updatedCells[i][secondIndex].piece &&
-          updatedCells[i][secondIndex].colorPiece === enemyColor
-        )
-          break;
-      }
-
-      for (let i = secondIndex + 1; i < 8; i++) {
-        if (
-          updatedCells[firstIndex][i].piece &&
-          updatedCells[firstIndex][i].colorPiece !== enemyColor
-        ) {
-          break;
-        }
-
-        updatedCells[firstIndex][i].isAllowMove = selectedCell.selected;
-
-        if (
-          updatedCells[firstIndex][i].piece &&
-          updatedCells[firstIndex][i].colorPiece === enemyColor
-        )
-          break;
-      }
-
-      for (let i = secondIndex - 1; i >= 0; i--) {
-        if (
-          updatedCells[firstIndex][i].piece &&
-          updatedCells[firstIndex][i].colorPiece !== enemyColor
-        ) {
-          break;
-        }
-
-        updatedCells[firstIndex][i].isAllowMove = selectedCell.selected;
-
-        if (
-          updatedCells[firstIndex][i].piece &&
-          updatedCells[firstIndex][i].colorPiece === enemyColor
-        )
-          break;
+        if (cell.piece && cell.colorPiece === enemyColor) break;
       }
     };
 
+    const enemyColor = turn === "black" ? "white" : "black";
+
     if (selectedCell.piece === "Pawn") {
-      if (turn === "black") {
-        handlePawnMoves(1, 1, "white");
-      } else if (turn === "white") {
-        handlePawnMoves(-1, 6, "black");
-      }
+      const direction = turn === "black" ? 1 : -1;
+      const startRow = turn === "black" ? 1 : 6;
+      handlePawnMoves(direction, startRow, enemyColor);
     } else if (selectedCell.piece === "Rook") {
-      if (turn === "black") {
-        handleRookMoves("white");
-      } else if (turn === "white") {
-        handleRookMoves("black");
-      }
+      handleRookMoves(enemyColor, firstIndex - 1, -1, true, -1); // Up
+      handleRookMoves(enemyColor, firstIndex + 1, 8, true, 1); // Down
+      handleRookMoves(enemyColor, secondIndex + 1, 8, false, 1); // Right
+      handleRookMoves(enemyColor, secondIndex - 1, -1, false, -1); // Left
     }
 
     setCells(updatedCells);

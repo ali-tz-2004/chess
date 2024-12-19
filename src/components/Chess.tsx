@@ -2,7 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { BorderChess } from "./BorderChess";
 import { ChessPiece } from "./ChessPiece";
 import { Images } from "../assets/images/images";
-import Draggable from "react-draggable";
+import {
+  initialPiecePlacement,
+  initialPieceColors,
+  convertPawPiece,
+} from "../data/Piece";
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
@@ -16,32 +20,6 @@ interface CellType {
   isUpdatePice: boolean;
 }
 
-const initialPiecePlacement: (keyof (typeof Images)["black"] | null)[][] = [
-  ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
-  Array(8).fill("Pawn"),
-  ...Array(4).fill(Array(8).fill(null)),
-  Array(8).fill("Pawn"),
-  ["Rook", "Knight", "Bishop", "Queen", "King", "Bishop", "Knight", "Rook"],
-];
-
-const initialPieceColors: (keyof typeof Images | null)[] = [
-  "black",
-  "black",
-  null,
-  null,
-  null,
-  null,
-  "white",
-  "white",
-];
-
-const convertPawPiece: (keyof (typeof Images)["black"])[] = [
-  "Rook",
-  "Knight",
-  "Bishop",
-  "Queen",
-];
-
 export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
   const [turn, setTurn] = useState<keyof typeof Images>("white");
@@ -49,33 +27,11 @@ export const Chess = () => {
   const countRow = 8;
   const countColumn = 8;
 
-  const clearAllowMoveAndSelected = () => {
+  const clearAllowMoveAndSelected = (
+    firstIndex: number | undefined = undefined,
+    secondIndex: number | undefined = undefined
+  ) => {
     let cell = [...cells];
-
-    for (let i = 0; i < countRow; i++) {
-      for (let j = 0; j < countColumn; j++) {
-        cell[i][j].isAllowMove = false;
-        cell[i][j].selected = false;
-      }
-    }
-    setCells(cell);
-  };
-
-  const checkUpdatePice = (): boolean => {
-    let cell = [...cells];
-    for (let i = 0; i < countRow; i++) {
-      for (let j = 0; j < countColumn; j++) {
-        if (cell[i][j].isUpdatePice) return true;
-      }
-    }
-
-    return false;
-  };
-
-  const changePieceHandler = (firstIndex: number, secondIndex: number) => {
-    let cell = [...cells];
-
-    if (cell[firstIndex][secondIndex].isUpdatePice || checkUpdatePice()) return;
 
     for (let i = 0; i < countRow; i++) {
       for (let j = 0; j < countColumn; j++) {
@@ -85,95 +41,79 @@ export const Chess = () => {
       }
     }
     setCells(cell);
-
-    const cellSelected = cell[firstIndex][secondIndex];
-
-    if (cellSelected.colorPiece === turn) {
-      cellSelected.selected = !cellSelected.selected;
-
-      switch (cellSelected.colorPiece) {
-        case "black":
-          switch (cellSelected.piece) {
-            case "Pawn":
-              if (
-                firstIndex === 1 &&
-                !cell[firstIndex + 1][secondIndex].piece &&
-                !cell[firstIndex + 2][secondIndex].piece
-              ) {
-                cell[firstIndex + 1][secondIndex].isAllowMove =
-                  cellSelected.selected;
-                cell[firstIndex + 2][secondIndex].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (!cell[firstIndex + 1][secondIndex].piece) {
-                cell[firstIndex + 1][secondIndex].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (
-                secondIndex !== 0 &&
-                cell[firstIndex + 1][secondIndex - 1].piece &&
-                cell[firstIndex + 1][secondIndex - 1].colorPiece === "white"
-              ) {
-                cell[firstIndex + 1][secondIndex - 1].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (
-                secondIndex !== 7 &&
-                cell[firstIndex + 1][secondIndex + 1].piece &&
-                cell[firstIndex + 1][secondIndex + 1].colorPiece === "white"
-              ) {
-                cell[firstIndex + 1][secondIndex + 1].isAllowMove =
-                  cellSelected.selected;
-              }
-              break;
-            default:
-              break;
-          }
-          break;
-        case "white":
-          switch (cellSelected.piece) {
-            case "Pawn":
-              if (
-                firstIndex === 6 &&
-                !cell[firstIndex - 1][secondIndex].piece &&
-                !cell[firstIndex - 2][secondIndex].piece
-              ) {
-                cell[firstIndex - 1][secondIndex].isAllowMove =
-                  cellSelected.selected;
-                cell[firstIndex - 2][secondIndex].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (!cell[firstIndex - 1][secondIndex].piece) {
-                cell[firstIndex - 1][secondIndex].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (
-                secondIndex !== 0 &&
-                cell[firstIndex - 1][secondIndex - 1].piece &&
-                cell[firstIndex - 1][secondIndex - 1].colorPiece === "black"
-              ) {
-                cell[firstIndex - 1][secondIndex - 1].isAllowMove =
-                  cellSelected.selected;
-              }
-              if (
-                secondIndex !== 7 &&
-                cell[firstIndex - 1][secondIndex + 1].piece &&
-                cell[firstIndex - 1][secondIndex + 1].colorPiece === "black"
-              ) {
-                cell[firstIndex - 1][secondIndex + 1].isAllowMove =
-                  cellSelected.selected;
-              }
-              break;
-            default:
-              break;
-          }
-          break;
-      }
-      setCells(cell);
-    }
   };
 
-  useEffect(() => {
+  const checkUpdatePice = (): boolean => {
+    return cells.some((row) => row.some((cell) => cell.isUpdatePice));
+  };
+
+  const changePieceHandler = (firstIndex: number, secondIndex: number) => {
+    let updatedCells = [...cells];
+
+    if (checkUpdatePice()) return;
+
+    clearAllowMoveAndSelected(firstIndex, secondIndex);
+
+    const selectedCell = updatedCells[firstIndex][secondIndex];
+
+    if (selectedCell.colorPiece !== turn) return;
+
+    selectedCell.selected = !selectedCell.selected;
+
+    const handlePawnMoves = (
+      direction: number,
+      startRow: number,
+      enemyColor: keyof typeof Images
+    ) => {
+      if (
+        firstIndex === startRow &&
+        !updatedCells[firstIndex + direction][secondIndex].piece &&
+        !updatedCells[firstIndex + 2 * direction][secondIndex].piece
+      ) {
+        updatedCells[firstIndex + direction][secondIndex].isAllowMove =
+          selectedCell.selected;
+        updatedCells[firstIndex + 2 * direction][secondIndex].isAllowMove =
+          selectedCell.selected;
+      }
+
+      if (!updatedCells[firstIndex + direction][secondIndex].piece) {
+        updatedCells[firstIndex + direction][secondIndex].isAllowMove =
+          selectedCell.selected;
+      }
+
+      if (
+        secondIndex > 0 &&
+        updatedCells[firstIndex + direction][secondIndex - 1].piece &&
+        updatedCells[firstIndex + direction][secondIndex - 1].colorPiece ===
+          enemyColor
+      ) {
+        updatedCells[firstIndex + direction][secondIndex - 1].isAllowMove =
+          selectedCell.selected;
+      }
+
+      if (
+        secondIndex < 7 &&
+        updatedCells[firstIndex + direction][secondIndex + 1].piece &&
+        updatedCells[firstIndex + direction][secondIndex + 1].colorPiece ===
+          enemyColor
+      ) {
+        updatedCells[firstIndex + direction][secondIndex + 1].isAllowMove =
+          selectedCell.selected;
+      }
+    };
+
+    if (selectedCell.piece === "Pawn") {
+      if (turn === "black") {
+        handlePawnMoves(1, 1, "white");
+      } else if (turn === "white") {
+        handlePawnMoves(-1, 6, "black");
+      }
+    }
+
+    setCells(updatedCells);
+  };
+
+  const initialBase = () => {
     let tempList: CellType[][] = [];
     let id = 1;
 
@@ -204,6 +144,10 @@ export const Chess = () => {
     }
 
     setCells(tempList);
+  };
+
+  useEffect(() => {
+    initialBase();
   }, []);
 
   const [selected, setSelected] = useState<number[]>([]);

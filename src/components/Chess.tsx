@@ -119,71 +119,31 @@ export const Chess = () => {
     };
 
     const handleKnightMoves = () => {
-      if (
-        firstIndex - 2 >= 0 &&
-        secondIndex - 1 >= 0 &&
-        updatedCells[firstIndex - 2][secondIndex - 1].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex - 2][secondIndex - 1].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex - 2 >= 0 &&
-        secondIndex + 1 < 8 &&
-        updatedCells[firstIndex - 2][secondIndex + 1].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex - 2][secondIndex + 1].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex - 1 >= 0 &&
-        secondIndex - 2 >= 0 &&
-        updatedCells[firstIndex - 1][secondIndex - 2].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex - 1][secondIndex - 2].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex - 1 >= 0 &&
-        secondIndex + 2 < 8 &&
-        updatedCells[firstIndex - 1][secondIndex + 2].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex - 1][secondIndex + 2].isAllowMove =
-          selectedCell.selected;
-      }
+      const knightMoves = [
+        [-2, -1],
+        [-2, 1],
+        [-1, -2],
+        [-1, 2],
+        [2, -1],
+        [2, 1],
+        [1, -2],
+        [1, 2],
+      ];
 
-      if (
-        firstIndex + 2 < 8 &&
-        secondIndex - 1 >= 0 &&
-        updatedCells[firstIndex + 2][secondIndex - 1].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex + 2][secondIndex - 1].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex + 2 < 8 &&
-        secondIndex + 1 < 8 &&
-        updatedCells[firstIndex + 2][secondIndex + 1].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex + 2][secondIndex + 1].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex + 1 < 8 &&
-        secondIndex - 2 >= 0 &&
-        updatedCells[firstIndex + 1][secondIndex - 2].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex + 1][secondIndex - 2].isAllowMove =
-          selectedCell.selected;
-      }
-      if (
-        firstIndex + 1 < 8 &&
-        secondIndex + 2 < 8 &&
-        updatedCells[firstIndex + 1][secondIndex + 2].colorPiece !== turn
-      ) {
-        updatedCells[firstIndex + 1][secondIndex + 2].isAllowMove =
-          selectedCell.selected;
-      }
+      knightMoves.forEach(([rowOffset, colOffset]) => {
+        const newRow = firstIndex + rowOffset;
+        const newCol = secondIndex + colOffset;
+
+        if (
+          newRow >= 0 &&
+          newRow < 8 &&
+          newCol >= 0 &&
+          newCol < 8 &&
+          updatedCells[newRow][newCol].colorPiece !== turn
+        ) {
+          updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+        }
+      });
     };
 
     if (selectedCell.piece === "Pawn") {

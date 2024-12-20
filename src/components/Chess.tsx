@@ -173,6 +173,18 @@ export const Chess = () => {
       }
     };
 
+    const handleQueenMoves = () => {
+      handleRookMoves(firstIndex - 1, -1, true, -1); // Up
+      handleRookMoves(firstIndex + 1, 8, true, 1); // Down
+      handleRookMoves(secondIndex + 1, 8, false, 1); // Right
+      handleRookMoves(secondIndex - 1, -1, false, -1); // Left
+
+      handleBishopMoves(-1, -1); // Top-left
+      handleBishopMoves(1, 1); // Bottom-right
+      handleBishopMoves(1, -1); // Bottom-left
+      handleBishopMoves(-1, 1); // Top-right
+    };
+
     if (selectedCell.piece === "Pawn") {
       const direction = turn === "black" ? 1 : -1;
       const startRow = turn === "black" ? 1 : 6;
@@ -189,6 +201,8 @@ export const Chess = () => {
       handleBishopMoves(1, 1); // Bottom-right
       handleBishopMoves(1, -1); // Bottom-left
       handleBishopMoves(-1, 1); // Top-right
+    } else if (selectedCell.piece === "Queen") {
+      handleQueenMoves();
     }
 
     setCells(updatedCells);

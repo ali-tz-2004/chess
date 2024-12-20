@@ -59,12 +59,9 @@ export const Chess = () => {
     if (selectedCell.colorPiece !== turn) return;
 
     selectedCell.selected = !selectedCell.selected;
+    const enemyColor = turn === "black" ? "white" : "black";
 
-    const handlePawnMoves = (
-      direction: number,
-      startRow: number,
-      enemyColor: keyof typeof Images
-    ) => {
+    const handlePawnMoves = (direction: number, startRow: number) => {
       if (
         firstIndex === startRow &&
         !updatedCells[firstIndex + direction][secondIndex].piece &&
@@ -103,7 +100,6 @@ export const Chess = () => {
     };
 
     const handleRookMoves = (
-      enemyColor: keyof typeof Images,
       startIndex: number,
       endIndex: number,
       isRow: boolean,
@@ -122,17 +118,85 @@ export const Chess = () => {
       }
     };
 
-    const enemyColor = turn === "black" ? "white" : "black";
+    const handleKnightMoves = () => {
+      if (
+        firstIndex - 2 >= 0 &&
+        secondIndex - 1 >= 0 &&
+        updatedCells[firstIndex - 2][secondIndex - 1].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex - 2][secondIndex - 1].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex - 2 >= 0 &&
+        secondIndex + 1 < 8 &&
+        updatedCells[firstIndex - 2][secondIndex + 1].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex - 2][secondIndex + 1].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex - 1 >= 0 &&
+        secondIndex - 2 >= 0 &&
+        updatedCells[firstIndex - 1][secondIndex - 2].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex - 1][secondIndex - 2].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex - 1 >= 0 &&
+        secondIndex + 2 < 8 &&
+        updatedCells[firstIndex - 1][secondIndex + 2].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex - 1][secondIndex + 2].isAllowMove =
+          selectedCell.selected;
+      }
+
+      if (
+        firstIndex + 2 < 8 &&
+        secondIndex - 1 >= 0 &&
+        updatedCells[firstIndex + 2][secondIndex - 1].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex + 2][secondIndex - 1].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex + 2 < 8 &&
+        secondIndex + 1 < 8 &&
+        updatedCells[firstIndex + 2][secondIndex + 1].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex + 2][secondIndex + 1].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex + 1 < 8 &&
+        secondIndex - 2 >= 0 &&
+        updatedCells[firstIndex + 1][secondIndex - 2].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex + 1][secondIndex - 2].isAllowMove =
+          selectedCell.selected;
+      }
+      if (
+        firstIndex + 1 < 8 &&
+        secondIndex + 2 < 8 &&
+        updatedCells[firstIndex + 1][secondIndex + 2].colorPiece !== turn
+      ) {
+        updatedCells[firstIndex + 1][secondIndex + 2].isAllowMove =
+          selectedCell.selected;
+      }
+    };
 
     if (selectedCell.piece === "Pawn") {
       const direction = turn === "black" ? 1 : -1;
       const startRow = turn === "black" ? 1 : 6;
-      handlePawnMoves(direction, startRow, enemyColor);
+      handlePawnMoves(direction, startRow);
     } else if (selectedCell.piece === "Rook") {
-      handleRookMoves(enemyColor, firstIndex - 1, -1, true, -1); // Up
-      handleRookMoves(enemyColor, firstIndex + 1, 8, true, 1); // Down
-      handleRookMoves(enemyColor, secondIndex + 1, 8, false, 1); // Right
-      handleRookMoves(enemyColor, secondIndex - 1, -1, false, -1); // Left
+      handleRookMoves(firstIndex - 1, -1, true, -1); // Up
+      handleRookMoves(firstIndex + 1, 8, true, 1); // Down
+      handleRookMoves(secondIndex + 1, 8, false, 1); // Right
+      handleRookMoves(secondIndex - 1, -1, false, -1); // Left
+    } else if (selectedCell.piece === "Knight") {
+      handleKnightMoves();
     }
 
     setCells(updatedCells);
@@ -187,6 +251,7 @@ export const Chess = () => {
       cellsCopy[firstIndex][secondIndex].piece =
         cellsCopy[selected[0]][selected[1]].piece;
       cellsCopy[selected[0]][selected[1]].piece = null;
+      cellsCopy[selected[0]][selected[1]].colorPiece = null;
       cellsCopy[firstIndex][secondIndex].colorPiece = turn;
       clearAllowMoveAndSelected();
 

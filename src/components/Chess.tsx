@@ -149,81 +149,27 @@ export const Chess = () => {
       });
     };
 
-    const handleBishopMoves = () => {
-      let column = firstIndex;
-      let row = secondIndex;
+    const handleBishopMoves = (rowStep: number, colStep: number) => {
+      let row = firstIndex;
+      let col = secondIndex;
 
-      while (column > firstCell && row > firstCell) {
-        column--;
-        row--;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === turn
-        )
-          break;
-        updatedCells[column][row].isAllowMove = selectedCell.selected;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === enemyColor
-        )
-          break;
-      }
+      while (row >= 0 && row < 8 && col >= 0 && col < 8) {
+        row += rowStep;
+        col += colStep;
 
-      column = firstIndex;
-      row = secondIndex;
+        if (row < 0 || row >= 8 || col < 0 || col >= 8) break;
 
-      while (column < lastCell - 1 && row < lastCell - 1) {
-        column++;
-        row++;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === turn
-        )
-          break;
-        updatedCells[column][row].isAllowMove = selectedCell.selected;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === enemyColor
-        )
-          break;
-      }
+        const cell = updatedCells[row][col];
 
-      column = firstIndex;
-      row = secondIndex;
+        if (cell.piece) {
+          if (cell.colorPiece === turn) break;
 
-      while (column < lastCell - 1 && row > firstCell) {
-        column++;
-        row--;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === turn
-        )
-          break;
-        updatedCells[column][row].isAllowMove = selectedCell.selected;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === enemyColor
-        )
-          break;
-      }
+          cell.isAllowMove = selectedCell.selected;
 
-      column = firstIndex;
-      row = secondIndex;
-
-      while (column > firstCell && row < lastCell - 1) {
-        column--;
-        row++;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === turn
-        )
-          break;
-        updatedCells[column][row].isAllowMove = selectedCell.selected;
-        if (
-          updatedCells[column][row].piece &&
-          updatedCells[column][row].colorPiece === enemyColor
-        )
-          break;
+          if (cell.colorPiece === enemyColor) break;
+        } else {
+          cell.isAllowMove = selectedCell.selected;
+        }
       }
     };
 
@@ -239,7 +185,10 @@ export const Chess = () => {
     } else if (selectedCell.piece === "Knight") {
       handleKnightMoves();
     } else if (selectedCell.piece === "Bishop") {
-      handleBishopMoves();
+      handleBishopMoves(-1, -1); // Top-left
+      handleBishopMoves(1, 1); // Bottom-right
+      handleBishopMoves(1, -1); // Bottom-left
+      handleBishopMoves(-1, 1); // Top-right
     }
 
     setCells(updatedCells);

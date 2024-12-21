@@ -18,6 +18,7 @@ interface CellType {
   selected: boolean;
   isAllowMove: boolean;
   isUpdatePice: boolean;
+  isChange: boolean;
 }
 
 export const Chess = () => {
@@ -173,6 +174,34 @@ export const Chess = () => {
       }
     };
 
+    const handleKingMoves = () => {
+      const moves = [
+        [-1, 0],
+        [-1, -1],
+        [-1, 1],
+        [0, 1],
+        [0, -1],
+        [1, 0],
+        [1, -1],
+        [1, 1],
+      ];
+
+      moves.forEach(([rowOffset, colOffset]) => {
+        const newRow = firstIndex + rowOffset;
+        const newCol = secondIndex + colOffset;
+
+        if (
+          newRow >= firstCell &&
+          newRow < lastCell &&
+          newCol >= firstCell &&
+          newCol < lastCell &&
+          updatedCells[newRow][newCol].colorPiece !== turn
+        ) {
+          updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+        }
+      });
+    };
+
     const handleQueenMoves = () => {
       handleRookMoves(firstIndex - 1, -1, true, -1); // Up
       handleRookMoves(firstIndex + 1, 8, true, 1); // Down
@@ -203,6 +232,8 @@ export const Chess = () => {
       handleBishopMoves(-1, 1); // Top-right
     } else if (selectedCell.piece === "Queen") {
       handleQueenMoves();
+    } else {
+      handleKingMoves();
     }
 
     setCells(updatedCells);
@@ -231,6 +262,7 @@ export const Chess = () => {
           selected: false,
           isAllowMove: false,
           isUpdatePice: false,
+          isChange: false,
         };
 
         tempList[i].push(temp);
@@ -259,6 +291,7 @@ export const Chess = () => {
       cellsCopy[selected[0]][selected[1]].piece = null;
       cellsCopy[selected[0]][selected[1]].colorPiece = null;
       cellsCopy[firstIndex][secondIndex].colorPiece = turn;
+      cellsCopy[firstIndex][secondIndex].isChange = true;
       clearAllowMoveAndSelected();
 
       if (

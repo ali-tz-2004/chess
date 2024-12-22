@@ -200,6 +200,27 @@ export const Chess = () => {
           updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
         }
       });
+
+      if (!selectedCell.isChange) {
+        if (
+          !updatedCells[firstIndex][secondIndex - 4].isChange &&
+          !updatedCells[firstIndex][secondIndex - 3].piece &&
+          !updatedCells[firstIndex][secondIndex - 2].piece &&
+          !updatedCells[firstIndex][secondIndex - 1].piece
+        ) {
+          updatedCells[firstIndex][secondIndex - 2].isAllowMove =
+            selectedCell.selected;
+        }
+
+        if (
+          !updatedCells[firstIndex][secondIndex + 3].isChange &&
+          !updatedCells[firstIndex][secondIndex + 2].piece &&
+          !updatedCells[firstIndex][secondIndex + 1].piece
+        ) {
+          updatedCells[firstIndex][secondIndex + 2].isAllowMove =
+            selectedCell.selected;
+        }
+      }
     };
 
     const handleQueenMoves = () => {
@@ -292,6 +313,37 @@ export const Chess = () => {
       cellsCopy[selected[0]][selected[1]].colorPiece = null;
       cellsCopy[firstIndex][secondIndex].colorPiece = turn;
       cellsCopy[firstIndex][secondIndex].isChange = true;
+
+      if (
+        turn === "white" &&
+        cellsCopy[firstIndex][secondIndex].piece === "King"
+      ) {
+        if (selected[1] - 2 === secondIndex) {
+          cellsCopy[7][0].piece = null;
+          cellsCopy[7][3].piece = "Rook";
+          cellsCopy[7][3].colorPiece = turn;
+        } else if (selected[1] + 2 === secondIndex) {
+          cellsCopy[7][7].piece = null;
+          cellsCopy[7][5].piece = "Rook";
+          cellsCopy[7][5].colorPiece = turn;
+        }
+      }
+
+      if (
+        turn === "black" &&
+        cellsCopy[firstIndex][secondIndex].piece === "King"
+      ) {
+        if (selected[1] - 2 === secondIndex) {
+          cellsCopy[0][0].piece = null;
+          cellsCopy[0][3].piece = "Rook";
+          cellsCopy[0][3].colorPiece = turn;
+        } else if (selected[1] + 2 === secondIndex) {
+          cellsCopy[0][7].piece = null;
+          cellsCopy[0][5].piece = "Rook";
+          cellsCopy[0][5].colorPiece = turn;
+        }
+      }
+
       clearAllowMoveAndSelected();
 
       if (

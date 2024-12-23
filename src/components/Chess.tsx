@@ -19,6 +19,7 @@ interface CellType {
   isAllowMove: boolean;
   isUpdatePice: boolean;
   isChange: boolean;
+  isCheck: boolean;
 }
 
 export const Chess = () => {
@@ -284,6 +285,7 @@ export const Chess = () => {
           isAllowMove: false,
           isUpdatePice: false,
           isChange: false,
+          isCheck: false,
         };
 
         tempList[i].push(temp);
@@ -367,24 +369,85 @@ export const Chess = () => {
       }
 
       setCells(cellsCopy);
+      if (isCheck(turn === "white" ? "black" : "white")) {
+        let kingColor = turn === "white" ? "black" : "white";
+        let rowIndex = cellsCopy.findIndex((row) =>
+          row.some(
+            (cell) => cell.piece === "King" && cell.colorPiece === kingColor
+          )
+        );
+
+        let columnIndex = 0;
+        if (rowIndex !== -1) {
+          columnIndex = cellsCopy[rowIndex].findIndex(
+            (cell) => cell.piece === "King" && cell.colorPiece === kingColor
+          );
+        }
+
+        if (rowIndex !== -1 && columnIndex !== -1) {
+          cellsCopy[rowIndex][columnIndex].isCheck = true;
+        }
+
+        console.log("Check!");
+      }
       setTurn(turn === "white" ? "black" : "white");
     } else {
       setSelected([firstIndex, secondIndex]);
     }
   };
 
-  function updatePow(
+  const updatePow = (
     firstIndex: number,
     secondIndex: number,
     piece: keyof (typeof Images)["black"]
-  ): void {
+  ): void => {
     const cellsCopy = [...cells];
     cells[firstIndex][secondIndex].piece = piece;
     cells[firstIndex][secondIndex].isUpdatePice = false;
 
     setTurn(turn === "white" ? "black" : "white");
     setCells(cellsCopy);
-  }
+  };
+
+  const isCheck = (kingColor: keyof typeof Images): boolean => {
+    const updatedCells = [...cells];
+    let kingPosition: [number, number] | null = null;
+
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
+        if (
+          updatedCells[i][j].piece === "King" &&
+          updatedCells[i][j].colorPiece === kingColor
+        ) {
+          kingPosition = [i, j];
+          break;
+        }
+      }
+      if (kingPosition) break;
+    }
+
+    if (!kingPosition) return false;
+
+    const [kingRow, kingCol] = kingPosition;
+    const enemyColor = kingColor === "white" ? "black" : "white";
+
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
+        const cell = updatedCells[i][j];
+        if (cell.colorPiece === enemyColor) {
+          clearAllowMoveAndSelected();
+          changePieceHandler(i, j);
+
+          if (updatedCells[kingRow][kingCol].isAllowMove) {
+            clearAllowMoveAndSelected();
+            return true;
+          }
+        }
+      }
+    }
+    clearAllowMoveAndSelected();
+    return false;
+  };
 
   return (
     <div
@@ -408,7 +471,7 @@ export const Chess = () => {
               <div
                 className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${
                   x.selected ? "bg-blue-400" : ""
-                }`}
+                }${x.isCheck ? "bg-red-400" : ""}`}
                 onClick={() => changePieceHandler(firstIndex, secondIndex)}
               >
                 <ChessPiece piece={x.piece} color={x.colorPiece} />

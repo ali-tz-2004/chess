@@ -370,24 +370,6 @@ export const Chess = () => {
 
       setCells(cellsCopy);
       if (isCheck(turn === "white" ? "black" : "white")) {
-        let kingColor = turn === "white" ? "black" : "white";
-        let rowIndex = cellsCopy.findIndex((row) =>
-          row.some(
-            (cell) => cell.piece === "King" && cell.colorPiece === kingColor
-          )
-        );
-
-        let columnIndex = 0;
-        if (rowIndex !== -1) {
-          columnIndex = cellsCopy[rowIndex].findIndex(
-            (cell) => cell.piece === "King" && cell.colorPiece === kingColor
-          );
-        }
-
-        if (rowIndex !== -1 && columnIndex !== -1) {
-          cellsCopy[rowIndex][columnIndex].isCheck = true;
-        }
-
         console.log("Check!");
       }
       setTurn(turn === "white" ? "black" : "white");
@@ -439,6 +421,7 @@ export const Chess = () => {
           changePieceHandler(i, j);
 
           if (updatedCells[kingRow][kingCol].isAllowMove) {
+            updatedCells[kingRow][kingCol].isCheck = true;
             clearAllowMoveAndSelected();
             return true;
           }

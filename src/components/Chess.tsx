@@ -26,6 +26,8 @@ export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
   const [turn, setTurn] = useState<keyof typeof Images>("white");
 
+  const [selected, setSelected] = useState<number[]>([]);
+
   const countRow = 8;
   const countColumn = 8;
 
@@ -49,7 +51,7 @@ export const Chess = () => {
     return cells.some((row) => row.some((cell) => cell.isUpdatePice));
   };
 
-  const changePieceHandler = (firstIndex: number, secondIndex: number) => {
+  const updatePieceAllowMove = (firstIndex: number, secondIndex: number) => {
     let updatedCells = [...cells];
 
     if (checkUpdatePice()) return;
@@ -254,8 +256,10 @@ export const Chess = () => {
       handleBishopMoves(-1, 1); // Top-right
     } else if (selectedCell.piece === "Queen") {
       handleQueenMoves();
-    } else {
+    } else if (selectedCell.piece === "King") {
       handleKingMoves();
+    } else {
+      return;
     }
 
     setCells(updatedCells);
@@ -295,12 +299,6 @@ export const Chess = () => {
 
     setCells(tempList);
   };
-
-  useEffect(() => {
-    initialBase();
-  }, []);
-
-  const [selected, setSelected] = useState<number[]>([]);
 
   const movedHandler = (
     isAllowMove: boolean,
@@ -354,8 +352,6 @@ export const Chess = () => {
         cellsCopy[firstIndex][secondIndex].piece === "Pawn"
       ) {
         cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
-        setCells(cellsCopy);
-        return;
       }
 
       if (
@@ -364,14 +360,13 @@ export const Chess = () => {
         cellsCopy[firstIndex][secondIndex].piece === "Pawn"
       ) {
         cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
-        setCells(cellsCopy);
-        return;
       }
 
-      setCells(cellsCopy);
       if (isCheck(turn === "white" ? "black" : "white")) {
         console.log("Check!");
       }
+
+      setCells(cellsCopy);
       setTurn(turn === "white" ? "black" : "white");
     } else {
       setSelected([firstIndex, secondIndex]);
@@ -387,7 +382,6 @@ export const Chess = () => {
     cells[firstIndex][secondIndex].piece = piece;
     cells[firstIndex][secondIndex].isUpdatePice = false;
 
-    setTurn(turn === "white" ? "black" : "white");
     setCells(cellsCopy);
   };
 
@@ -418,7 +412,7 @@ export const Chess = () => {
         const cell = updatedCells[i][j];
         if (cell.colorPiece === enemyColor) {
           clearAllowMoveAndSelected();
-          changePieceHandler(i, j);
+          updatePieceAllowMove(i, j);
 
           if (updatedCells[kingRow][kingCol].isAllowMove) {
             updatedCells[kingRow][kingCol].isCheck = true;
@@ -431,6 +425,10 @@ export const Chess = () => {
     clearAllowMoveAndSelected();
     return false;
   };
+
+  useEffect(() => {
+    initialBase();
+  }, []);
 
   return (
     <div
@@ -455,7 +453,7 @@ export const Chess = () => {
                 className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${
                   x.selected ? "bg-blue-400" : ""
                 }${x.isCheck ? "bg-red-400" : ""}`}
-                onClick={() => changePieceHandler(firstIndex, secondIndex)}
+                onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
               >
                 <ChessPiece piece={x.piece} color={x.colorPiece} />
               </div>
@@ -467,7 +465,10 @@ export const Chess = () => {
                     onClick={() => updatePow(firstIndex, secondIndex, y)}
                     className="pointer"
                   >
-                    <ChessPiece piece={y} color={turn} />
+                    <ChessPiece
+                      piece={y}
+                      color={turn === "black" ? "white" : "black"}
+                    />
                   </div>
                 ))}
               </div>

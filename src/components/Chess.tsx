@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { BorderChess } from "./BorderChess";
 import { ChessPiece } from "./ChessPiece";
 import { Images } from "../assets/images/images";
@@ -10,7 +10,7 @@ import {
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
-interface CellType {
+export interface CellType {
   id: number;
   bgColor: cellColorType;
   piece: keyof (typeof Images)["black"] | null;
@@ -22,11 +22,17 @@ interface CellType {
   isCheck: boolean;
 }
 
+export interface PositionsCheckedPiece {
+  positionKing: number[];
+  positionPiceCheck: number[];
+}
+
 export const Chess = () => {
   const [cells, setCells] = useState<CellType[][]>([]);
   const [turn, setTurn] = useState<keyof typeof Images>("white");
-
   const [selected, setSelected] = useState<number[]>([]);
+  const [positionsCheckedPiece, setPositionsCheckedPiece] =
+    useState<PositionsCheckedPiece>();
 
   const countRow = 8;
   const countColumn = 8;
@@ -68,28 +74,109 @@ export const Chess = () => {
     const firstCell = 0;
     const lastCell = 8;
 
+    const isRookOrQueen = (row: number, col: number) => {
+      const piece = updatedCells[row][col].piece;
+      return piece === "Rook" || piece === "Queen";
+    };
+
+    const isBishopOrQueen = (row: number, col: number) => {
+      const piece = updatedCells[row][col].piece;
+      return piece === "Bishop" || piece === "Queen";
+    };
+
+    const preventingCheckRookOrQueenWithPawn = (positionRowPawn: number) => {
+      if (positionsCheckedPiece) {
+        return positionsCheckedPiece.positionKing[0] === positionsCheckedPiece.positionPiceCheck[0] &&
+          isRookOrQueen(positionsCheckedPiece.positionPiceCheck[0], positionsCheckedPiece.positionPiceCheck[1]) &&
+          positionsCheckedPiece.positionKing[0] === positionRowPawn &&
+          ((positionsCheckedPiece.positionKing[1] > positionsCheckedPiece.positionPiceCheck[1] && secondIndex < positionsCheckedPiece.positionKing[1]) ||
+            (positionsCheckedPiece.positionKing[1] < positionsCheckedPiece.positionPiceCheck[1] && secondIndex < positionsCheckedPiece.positionPiceCheck[1]))
+      }
+    }
+
+    const preventingCheckBishopOrQueenWithPawn = (positionRowPawn: number, positionColumnPawn: number) => {
+      debugger;
+      let validPositions: number[][] = [];
+
+      if (positionsCheckedPiece && isBishopOrQueen(positionsCheckedPiece.positionPiceCheck[0], positionsCheckedPiece.positionPiceCheck[1])) {
+        if (positionsCheckedPiece.positionKing[0] < positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] > positionsCheckedPiece.positionPiceCheck[1]) {
+          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
+          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+
+          while (positionRowCheck > positionsCheckedPiece.positionKing[0] && positionColumnCheck < positionsCheckedPiece.positionKing[1]) {
+            positionRowCheck--;
+            positionColumnCheck++;
+            validPositions.push([positionRowCheck, positionColumnCheck]);
+          }
+        } else if (positionsCheckedPiece.positionKing[0] < positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] < positionsCheckedPiece.positionPiceCheck[1]) {
+          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
+          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+
+          while (positionRowCheck > positionsCheckedPiece.positionKing[0] && positionColumnCheck > positionsCheckedPiece.positionKing[1]) {
+            positionRowCheck--;
+            positionColumnCheck--;
+            validPositions.push([positionRowCheck, positionColumnCheck]);
+          }
+        } else if (positionsCheckedPiece.positionKing[0] > positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] < positionsCheckedPiece.positionPiceCheck[1]) {
+          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
+          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+
+          while (positionRowCheck < positionsCheckedPiece.positionKing[0] && positionColumnCheck > positionsCheckedPiece.positionKing[1]) {
+            positionRowCheck++;
+            positionColumnCheck--;
+            validPositions.push([positionRowCheck, positionColumnCheck]);
+          }
+        } else if (positionsCheckedPiece.positionKing[0] > positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] > positionsCheckedPiece.positionPiceCheck[1]) {
+          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
+          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+
+          while (positionRowCheck < positionsCheckedPiece.positionKing[0] && positionColumnCheck < positionsCheckedPiece.positionKing[1]) {
+            positionRowCheck++;
+            positionColumnCheck++;
+            validPositions.push([positionRowCheck, positionColumnCheck]);
+          }
+        }
+
+        return validPositions.some(([row, col]) => row === positionRowPawn && col === positionColumnPawn);
+      }
+
+      return false;
+    }
+
+
     const handlePawnMoves = (direction: number, startRow: number) => {
       if (
         firstIndex === startRow &&
         !updatedCells[firstIndex + direction][secondIndex].piece &&
         !updatedCells[firstIndex + 2 * direction][secondIndex].piece
       ) {
-        updatedCells[firstIndex + direction][secondIndex].isAllowMove =
-          selectedCell.selected;
-        updatedCells[firstIndex + 2 * direction][secondIndex].isAllowMove =
-          selectedCell.selected;
+        if (positionsCheckedPiece) {
+          if (preventingCheckRookOrQueenWithPawn(firstIndex + direction) || preventingCheckBishopOrQueenWithPawn(firstIndex + direction, secondIndex)) updatedCells[firstIndex + direction][secondIndex].isAllowMove = selectedCell.selected;
+          if (preventingCheckRookOrQueenWithPawn(firstIndex + 2 * direction) || preventingCheckBishopOrQueenWithPawn(firstIndex + 2 * direction, secondIndex)) updatedCells[firstIndex + 2 * direction][secondIndex].isAllowMove = selectedCell.selected;
+        } else {
+          updatedCells[firstIndex + direction][secondIndex].isAllowMove =
+            selectedCell.selected;
+          updatedCells[firstIndex + 2 * direction][secondIndex].isAllowMove =
+            selectedCell.selected;
+        }
       }
 
       if (!updatedCells[firstIndex + direction][secondIndex].piece) {
-        updatedCells[firstIndex + direction][secondIndex].isAllowMove =
-          selectedCell.selected;
+        if (positionsCheckedPiece) {
+          if (preventingCheckRookOrQueenWithPawn(firstIndex + direction) || preventingCheckBishopOrQueenWithPawn(firstIndex + direction, secondIndex)) {
+            updatedCells[firstIndex + direction][secondIndex].isAllowMove =
+              selectedCell.selected;
+          }
+        } else {
+          updatedCells[firstIndex + direction][secondIndex].isAllowMove =
+            selectedCell.selected;
+        }
       }
 
       if (
         secondIndex > 0 &&
         updatedCells[firstIndex + direction][secondIndex - 1].piece &&
-        updatedCells[firstIndex + direction][secondIndex - 1].colorPiece ===
-          enemyColor
+        updatedCells[firstIndex + direction][secondIndex - 1].colorPiece === enemyColor
       ) {
         updatedCells[firstIndex + direction][secondIndex - 1].isAllowMove =
           selectedCell.selected;
@@ -98,8 +185,7 @@ export const Chess = () => {
       if (
         secondIndex < 7 &&
         updatedCells[firstIndex + direction][secondIndex + 1].piece &&
-        updatedCells[firstIndex + direction][secondIndex + 1].colorPiece ===
-          enemyColor
+        updatedCells[firstIndex + direction][secondIndex + 1].colorPiece === enemyColor
       ) {
         updatedCells[firstIndex + direction][secondIndex + 1].isAllowMove =
           selectedCell.selected;
@@ -385,8 +471,11 @@ export const Chess = () => {
     setCells(cellsCopy);
   };
 
-  const isCheck = (kingColor: keyof typeof Images): boolean => {
-    const updatedCells = [...cells];
+  const isCheck = (
+    kingColor: "white" | "black",
+    cellsParams: CellType[][] | undefined = undefined
+  ): boolean => {
+    const updatedCells = cellsParams ?? [...cells];
     let kingPosition: [number, number] | null = null;
 
     for (let i = 0; i < countRow; i++) {
@@ -406,6 +495,7 @@ export const Chess = () => {
 
     const [kingRow, kingCol] = kingPosition;
     const enemyColor = kingColor === "white" ? "black" : "white";
+    let isKingInCheck = false;
 
     for (let i = 0; i < countRow; i++) {
       for (let j = 0; j < countColumn; j++) {
@@ -415,14 +505,23 @@ export const Chess = () => {
           updatePieceAllowMove(i, j);
 
           if (updatedCells[kingRow][kingCol].isAllowMove) {
+            let positionsCheckedPiece: PositionsCheckedPiece = {
+              positionKing: [kingRow, kingCol],
+              positionPiceCheck: [i, j],
+            };
             updatedCells[kingRow][kingCol].isCheck = true;
-            clearAllowMoveAndSelected();
-            return true;
+            setPositionsCheckedPiece(positionsCheckedPiece);
+
+            isKingInCheck = true;
           }
         }
       }
     }
+
     clearAllowMoveAndSelected();
+
+    if (!isKingInCheck) return false;
+
     return false;
   };
 
@@ -438,11 +537,9 @@ export const Chess = () => {
         cellChildren.map((x, secondIndex) => (
           <div
             key={x.id}
-            className={`${
-              x.bgColor
-            } w-full h-full flex items-center justify-center relative ${
-              x.isAllowMove ? "cursor-pointer" : ""
-            } `}
+            className={`${x.bgColor
+              } w-full h-full flex items-center justify-center relative ${x.isAllowMove ? "cursor-pointer" : ""
+              } `}
             onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
           >
             {x.isAllowMove ? (
@@ -450,9 +547,8 @@ export const Chess = () => {
             ) : null}
             {x.piece && x.colorPiece && (
               <div
-                className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${
-                  x.selected ? "bg-blue-400" : ""
-                }${x.isCheck ? "bg-red-400" : ""}`}
+                className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${x.selected ? "bg-blue-400" : ""
+                  }${x.isCheck ? "bg-red-400" : ""}`}
                 onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
               >
                 <ChessPiece piece={x.piece} color={x.colorPiece} />

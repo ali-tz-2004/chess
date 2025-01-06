@@ -182,7 +182,8 @@ export const Chess = () => {
         updatedCells[firstIndex + direction][secondIndex - 1].piece &&
         updatedCells[firstIndex + direction][secondIndex - 1].colorPiece === enemyColor
       ) {
-        if (!positionsCheckedPiece) updatedCells[firstIndex + direction][secondIndex - 1].isAllowMove = selectedCell.selected;
+        if (positionsCheckedPiece && positionsCheckedPiece.positionPiceCheck[0] === firstIndex + direction && positionsCheckedPiece.positionPiceCheck[1] === secondIndex - 1) updatedCells[firstIndex + direction][secondIndex - 1].isAllowMove = selectedCell.selected;
+        else updatedCells[firstIndex + direction][secondIndex - 1].isAllowMove = selectedCell.selected;
       }
 
       if (
@@ -190,7 +191,8 @@ export const Chess = () => {
         updatedCells[firstIndex + direction][secondIndex + 1].piece &&
         updatedCells[firstIndex + direction][secondIndex + 1].colorPiece === enemyColor
       ) {
-        if (!positionsCheckedPiece) updatedCells[firstIndex + direction][secondIndex + 1].isAllowMove = selectedCell.selected;
+        if (positionsCheckedPiece && positionsCheckedPiece.positionPiceCheck[0] === firstIndex + direction && positionsCheckedPiece.positionPiceCheck[1] === secondIndex + 1) updatedCells[firstIndex + direction][secondIndex + 1].isAllowMove = selectedCell.selected;
+        else updatedCells[firstIndex + direction][secondIndex + 1].isAllowMove = selectedCell.selected;
       }
     };
 

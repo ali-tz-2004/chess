@@ -76,9 +76,14 @@ export const Chess = () => {
     };
 
     const validAllowMove = (): boolean => {
-      let isTopLeftKing = false;
+      let status: "topLeft" | "topRight" | "bottomLeft" | "bottomRight" | null = null;
       let firstIndexTemp = firstIndex;
       let secondIndexTemp = secondIndex;
+
+      const resetIndex = () => {
+        firstIndexTemp = firstIndex;
+        secondIndexTemp = secondIndex;
+      }
 
       while (firstIndexTemp > firstCell && secondIndexTemp > firstCell) {
         firstIndexTemp--;
@@ -88,9 +93,7 @@ export const Chess = () => {
 
         if (colorPiece) {
           if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
-            isTopLeftKing = true;
-            firstIndexTemp = firstIndex;
-            secondIndexTemp = secondIndex;
+            status = "topLeft";
             break;
           } else {
             break;
@@ -98,10 +101,108 @@ export const Chess = () => {
         }
       }
 
-      if (isTopLeftKing) {
+      resetIndex();
+
+      while (firstIndexTemp > firstCell && secondIndexTemp < lastCell) {
+        firstIndexTemp--;
+        secondIndexTemp++;
+
+        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
+
+        if (colorPiece) {
+          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
+            status = "topRight";
+            break;
+          } else {
+            break;
+          }
+        }
+      }
+
+      resetIndex();
+
+      while (firstIndexTemp < lastCell && secondIndexTemp > firstCell) {
+        firstIndexTemp++;
+        secondIndexTemp--;
+
+        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
+
+        if (colorPiece) {
+          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
+            status = "bottomLeft";
+            break;
+          } else {
+            break;
+          }
+        }
+      }
+
+      resetIndex();
+
+      while (firstIndexTemp < lastCell && secondIndexTemp < lastCell) {
+        firstIndexTemp++;
+        secondIndexTemp++;
+
+        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
+
+        if (colorPiece) {
+          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
+            status = "bottomRight";
+            break;
+          } else {
+            break;
+          }
+        }
+      }
+
+      resetIndex();
+
+      if (status === "topLeft") {
         while (firstIndexTemp < lastCell && secondIndexTemp < lastCell) {
           firstIndexTemp++;
           secondIndexTemp++;
+
+          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
+
+          if (cell?.colorPiece) {
+            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
+            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
+          }
+        }
+      }
+
+      else if (status === "topRight") {
+        while (firstIndexTemp < lastCell && secondIndexTemp > firstCell) {
+          firstIndexTemp++;
+          secondIndexTemp--;
+
+          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
+
+          if (cell?.colorPiece) {
+            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
+            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
+          }
+        }
+      }
+
+      else if (status === "bottomLeft") {
+        while (firstIndexTemp > firstCell && secondIndexTemp < lastCell) {
+          firstIndexTemp--;
+          secondIndexTemp++;
+
+          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
+
+          if (cell?.colorPiece) {
+            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
+            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
+          }
+        }
+      }
+
+      else if (status === "bottomRight") {
+        while (firstIndexTemp > firstCell && secondIndexTemp > firstCell) {
+          firstIndexTemp--;
+          secondIndexTemp--;
 
           let cell = updatedCells[firstIndexTemp][secondIndexTemp];
 

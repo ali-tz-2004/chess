@@ -103,7 +103,7 @@ export const Chess = () => {
 
       resetIndex();
 
-      while (firstIndexTemp > firstCell && secondIndexTemp < lastCell) {
+      while (firstIndexTemp > firstCell && secondIndexTemp < lastCell - 1) {
         firstIndexTemp--;
         secondIndexTemp++;
 
@@ -121,7 +121,7 @@ export const Chess = () => {
 
       resetIndex();
 
-      while (firstIndexTemp < lastCell && secondIndexTemp > firstCell) {
+      while (firstIndexTemp < lastCell - 1 && secondIndexTemp > firstCell) {
         firstIndexTemp++;
         secondIndexTemp--;
 
@@ -139,7 +139,7 @@ export const Chess = () => {
 
       resetIndex();
 
-      while (firstIndexTemp < lastCell && secondIndexTemp < lastCell) {
+      while (firstIndexTemp < lastCell - 1 && secondIndexTemp < lastCell - 1) {
         firstIndexTemp++;
         secondIndexTemp++;
 
@@ -158,7 +158,7 @@ export const Chess = () => {
       resetIndex();
 
       if (status === "topLeft") {
-        while (firstIndexTemp < lastCell && secondIndexTemp < lastCell) {
+        while (firstIndexTemp < lastCell - 1 && secondIndexTemp < lastCell - 1) {
           firstIndexTemp++;
           secondIndexTemp++;
 
@@ -172,7 +172,7 @@ export const Chess = () => {
       }
 
       else if (status === "topRight") {
-        while (firstIndexTemp < lastCell && secondIndexTemp > firstCell) {
+        while (firstIndexTemp < lastCell - 1 && secondIndexTemp > firstCell) {
           firstIndexTemp++;
           secondIndexTemp--;
 
@@ -186,7 +186,7 @@ export const Chess = () => {
       }
 
       else if (status === "bottomLeft") {
-        while (firstIndexTemp > firstCell && secondIndexTemp < lastCell) {
+        while (firstIndexTemp > firstCell && secondIndexTemp < lastCell - 1) {
           firstIndexTemp--;
           secondIndexTemp++;
 

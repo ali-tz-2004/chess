@@ -55,6 +55,30 @@ export const Chess = () => {
     setCells(cell);
   };
 
+  const clearAllowMoveAndSelectedList = (
+    index: number[][],
+    status: boolean
+  ) => {
+    let cell = [...cells];
+
+    for (let i = 0; i < countRow; i++) {
+      for (let j = 0; j < countColumn; j++) {
+        cell[i][j].isAllowMove = false;
+        cell[i][j].selected = false;
+      }
+    }
+
+    for (let i = 0; i < index.length; i++) {
+      if (i === 0) {
+        cell[index[i][0]][index[i][1]].selected = status;
+      } else {
+        cell[index[i][0]][index[i][1]].isAllowMove = status;
+      }
+    }
+
+    setCells(cell);
+  };
+
   const checkUpdatePice = (): boolean => {
     return cells.some((row) => row.some((cell) => cell.isUpdatePice));
   };
@@ -62,6 +86,8 @@ export const Chess = () => {
 
   const updatePieceAllowMove = (firstIndex: number, secondIndex: number, isAllow: boolean = true) => {
     let updatedCells = [...cells];
+
+    const selectedCell = updatedCells[firstIndex][secondIndex];
     const firstCell = 0;
     const lastCell = 8;
 
@@ -75,152 +101,109 @@ export const Chess = () => {
       return piece === "Bishop" || piece === "Queen";
     };
 
-    const validAllowMove = (): boolean => {
-      let status: "topLeft" | "topRight" | "bottomLeft" | "bottomRight" | null = null;
-      let firstIndexTemp = firstIndex;
-      let secondIndexTemp = secondIndex;
+    const validAllowMove = (status: boolean): boolean => {
+      let statusBishopOrQueen: "topLeft" | "topRight" | "bottomLeft" | "bottomRight" | null = null;
+      let temp: number[][] = [];
+      let tempVirtual: number[][] = [];
 
-      const resetIndex = () => {
-        firstIndexTemp = firstIndex;
-        secondIndexTemp = secondIndex;
-      }
+      const checkDirection = (
+        deltaX: number,
+        deltaY: number
+      ): boolean => {
+        let x = firstIndex;
+        let y = secondIndex;
 
-      while (firstIndexTemp > firstCell && secondIndexTemp > firstCell) {
-        firstIndexTemp--;
-        secondIndexTemp--;
+        while (
+          x + deltaX >= firstCell &&
+          x + deltaX < lastCell &&
+          y + deltaY >= firstCell &&
+          y + deltaY < lastCell
+        ) {
+          debugger;
+          x += deltaX;
+          y += deltaY;
 
-        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
+          if (isBishopOrQueen(firstIndex, secondIndex) && !updatedCells[x][y].piece) {
+            tempVirtual.push([x, y]);
+          }
 
-        if (colorPiece) {
-          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
-            status = "topLeft";
-            break;
-          } else {
+          const cell = updatedCells[x][y];
+          if (cell?.colorPiece) {
+            if (cell.piece === "King" && cell.colorPiece === turn) {
+              temp = temp.concat(tempVirtual);
+              return true;
+            }
             break;
           }
         }
-      }
 
-      resetIndex();
+        tempVirtual = [];
 
-      while (firstIndexTemp > firstCell && secondIndexTemp < lastCell - 1) {
-        firstIndexTemp--;
-        secondIndexTemp++;
+        return false;
+      };
 
-        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
+      const resolveDirection = (
+        deltaX: number,
+        deltaY: number
+      ): boolean => {
+        let x = firstIndex;
+        let y = secondIndex;
 
-        if (colorPiece) {
-          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
-            status = "topRight";
-            break;
-          } else {
-            break;
+        temp.unshift([firstIndex, secondIndex]);
+
+        while (
+          x + deltaX >= firstCell &&
+          x + deltaX < lastCell &&
+          y + deltaY >= firstCell &&
+          y + deltaY < lastCell
+        ) {
+          x += deltaX;
+          y += deltaY;
+
+          const cell = updatedCells[x][y];
+
+          if (cell.isAllowMove) {
+            temp.push([x, y]);
           }
-        }
-      }
-
-      resetIndex();
-
-      while (firstIndexTemp < lastCell - 1 && secondIndexTemp > firstCell) {
-        firstIndexTemp++;
-        secondIndexTemp--;
-
-        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
-
-        if (colorPiece) {
-          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
-            status = "bottomLeft";
-            break;
-          } else {
-            break;
-          }
-        }
-      }
-
-      resetIndex();
-
-      while (firstIndexTemp < lastCell - 1 && secondIndexTemp < lastCell - 1) {
-        firstIndexTemp++;
-        secondIndexTemp++;
-
-        let colorPiece = updatedCells[firstIndexTemp][secondIndexTemp]?.colorPiece;
-
-        if (colorPiece) {
-          if (updatedCells[firstIndexTemp][secondIndexTemp].piece === "King" && colorPiece === turn) {
-            status = "bottomRight";
-            break;
-          } else {
-            break;
-          }
-        }
-      }
-
-      resetIndex();
-
-      if (status === "topLeft") {
-        while (firstIndexTemp < lastCell - 1 && secondIndexTemp < lastCell - 1) {
-          firstIndexTemp++;
-          secondIndexTemp++;
-
-          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
 
           if (cell?.colorPiece) {
-            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
-            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
+            if (isBishopOrQueen(x, y) && cell.colorPiece !== turn) {
+              clearAllowMoveAndSelectedList(temp, status);
+              return true;
+            }
+            return false;
           }
         }
+
+        return false;
+      };
+
+      // Check all directions for King presence
+      if (checkDirection(-1, -1)) statusBishopOrQueen = "topLeft";
+      else if (checkDirection(-1, 1)) statusBishopOrQueen = "topRight";
+      else if (checkDirection(1, -1)) statusBishopOrQueen = "bottomLeft";
+      else if (checkDirection(1, 1)) statusBishopOrQueen = "bottomRight";
+
+      // Process based on identified direction
+      switch (statusBishopOrQueen) {
+        case "topLeft":
+          return resolveDirection(1, 1);
+        case "topRight":
+          return resolveDirection(1, -1);
+        case "bottomLeft":
+          return resolveDirection(-1, 1);
+        case "bottomRight":
+          return resolveDirection(-1, -1);
+        default:
+          return false;
       }
+    };
 
-      else if (status === "topRight") {
-        while (firstIndexTemp < lastCell - 1 && secondIndexTemp > firstCell) {
-          firstIndexTemp++;
-          secondIndexTemp--;
-
-          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
-
-          if (cell?.colorPiece) {
-            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
-            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
-          }
-        }
-      }
-
-      else if (status === "bottomLeft") {
-        while (firstIndexTemp > firstCell && secondIndexTemp < lastCell - 1) {
-          firstIndexTemp--;
-          secondIndexTemp++;
-
-          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
-
-          if (cell?.colorPiece) {
-            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
-            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
-          }
-        }
-      }
-
-      else if (status === "bottomRight") {
-        while (firstIndexTemp > firstCell && secondIndexTemp > firstCell) {
-          firstIndexTemp--;
-          secondIndexTemp--;
-
-          let cell = updatedCells[firstIndexTemp][secondIndexTemp];
-
-          if (cell?.colorPiece) {
-            if (cell.isAllowMove) { clearAllowMoveAndSelected(firstIndexTemp, secondIndexTemp) }
-            return isBishopOrQueen(firstIndexTemp, secondIndexTemp) && cell.colorPiece !== turn && !cell.isAllowMove ? true : false;
-          }
-        }
-      }
-
-      return false;
-    }
 
     if (checkUpdatePice()) return;
 
     clearAllowMoveAndSelected(firstIndex, secondIndex);
 
-    const selectedCell = updatedCells[firstIndex][secondIndex];
 
     if (selectedCell.colorPiece !== turn) return;
 
@@ -496,8 +479,7 @@ export const Chess = () => {
       return;
     }
 
-    if (isAllow) if (validAllowMove()) {
-      clearAllowMoveAndSelected(firstIndex, secondIndex);
+    if (isAllow) if (validAllowMove(selectedCell.selected)) {
       return;
     }
 

@@ -222,44 +222,19 @@ export const Chess = () => {
     }
 
     const preventingCheckBishopOrQueenWithPawn = (positionRowPawn: number, positionColumnPawn: number) => {
-      let validPositions: number[][] = [];
-
       if (positionsCheckedPiece && isBishopOrQueen(positionsCheckedPiece.positionPiceCheck[0], positionsCheckedPiece.positionPiceCheck[1])) {
-        if (positionsCheckedPiece.positionKing[0] < positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] > positionsCheckedPiece.positionPiceCheck[1]) {
-          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
-          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+        const { positionKing, positionPiceCheck } = positionsCheckedPiece;
+        const validPositions: number[][] = [];
+        const directionRow = Math.sign(positionKing[0] - positionPiceCheck[0]);
+        const directionCol = Math.sign(positionKing[1] - positionPiceCheck[1]);
 
-          while (positionRowCheck > positionsCheckedPiece.positionKing[0] && positionColumnCheck < positionsCheckedPiece.positionKing[1]) {
-            positionRowCheck--;
-            positionColumnCheck++;
-            validPositions.push([positionRowCheck, positionColumnCheck]);
-          }
-        } else if (positionsCheckedPiece.positionKing[0] < positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] < positionsCheckedPiece.positionPiceCheck[1]) {
-          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
-          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
+        if (Math.abs(directionRow) === Math.abs(directionCol)) {
+          let [row, col] = positionPiceCheck;
 
-          while (positionRowCheck > positionsCheckedPiece.positionKing[0] && positionColumnCheck > positionsCheckedPiece.positionKing[1]) {
-            positionRowCheck--;
-            positionColumnCheck--;
-            validPositions.push([positionRowCheck, positionColumnCheck]);
-          }
-        } else if (positionsCheckedPiece.positionKing[0] > positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] < positionsCheckedPiece.positionPiceCheck[1]) {
-          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
-          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
-
-          while (positionRowCheck < positionsCheckedPiece.positionKing[0] && positionColumnCheck > positionsCheckedPiece.positionKing[1]) {
-            positionRowCheck++;
-            positionColumnCheck--;
-            validPositions.push([positionRowCheck, positionColumnCheck]);
-          }
-        } else if (positionsCheckedPiece.positionKing[0] > positionsCheckedPiece.positionPiceCheck[0] && positionsCheckedPiece.positionKing[1] > positionsCheckedPiece.positionPiceCheck[1]) {
-          let positionRowCheck = positionsCheckedPiece.positionPiceCheck[0];
-          let positionColumnCheck = positionsCheckedPiece.positionPiceCheck[1];
-
-          while (positionRowCheck < positionsCheckedPiece.positionKing[0] && positionColumnCheck < positionsCheckedPiece.positionKing[1]) {
-            positionRowCheck++;
-            positionColumnCheck++;
-            validPositions.push([positionRowCheck, positionColumnCheck]);
+          while (row !== positionKing[0] && col !== positionKing[1]) {
+            row += directionRow;
+            col += directionCol;
+            validPositions.push([row, col]);
           }
         }
 

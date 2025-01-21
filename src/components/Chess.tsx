@@ -349,7 +349,15 @@ export const Chess = () => {
 
         if (cell.piece && cell.colorPiece !== enemyColor) break;
 
-        cell.isAllowMove = selectedCell.selected;
+        if (positionsCheckedPiece) {
+          let [rowPiceCheck, colPiceCheck] = positionsCheckedPiece.positionPiceCheck;
+
+          if (preventingCheckRookOrQueen(isRow ? i : secondIndex, isRow ? firstIndex : i) || preventingCheckBishopOrQueen(isRow ? i : secondIndex, isRow ? firstIndex : i) || (rowPiceCheck === (isRow ? i : secondIndex) && colPiceCheck === (isRow ? firstIndex : i))) {
+            cell.isAllowMove = selectedCell.selected;
+          }
+        } else {
+          cell.isAllowMove = selectedCell.selected;
+        }
 
         if (cell.piece && cell.colorPiece === enemyColor) break;
       }

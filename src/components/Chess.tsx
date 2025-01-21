@@ -378,7 +378,16 @@ export const Chess = () => {
           newCol < lastCell &&
           updatedCells[newRow][newCol].colorPiece !== turn
         ) {
-          updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+          if (positionsCheckedPiece) {
+            let [rowPiceCheck, colPiceCheck] = positionsCheckedPiece.positionPiceCheck;
+
+            if (preventingCheckRookOrQueen(newRow, newCol) || preventingCheckBishopOrQueen(newRow, newCol) || (rowPiceCheck === newRow && colPiceCheck === newCol)) {
+              updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+            }
+          } else {
+            updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+
+          }
         }
       });
     };

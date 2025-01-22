@@ -154,7 +154,8 @@ export const Chess = () => {
 
       const resolveDirection = (
         statusRow: number,
-        statusColumn: number
+        statusColumn: number,
+        isRookOrQueenProp: boolean = false
       ): boolean => {
         let row = firstIndex;
         let column = secondIndex;
@@ -177,7 +178,7 @@ export const Chess = () => {
           }
 
           if (cell?.colorPiece) {
-            if (isBishopOrQueen(row, column) && cell.colorPiece !== turn) {
+            if (isRookOrQueenProp ? isRookOrQueen(row, column) : isBishopOrQueen(row, column) && cell.colorPiece !== turn) {
               clearAllowMoveAndSelectedList(temp, status);
               return true;
             }
@@ -193,6 +194,7 @@ export const Chess = () => {
       else if (checkDirection(-1, 1)) statusBishopOrQueen = "topRight";
       else if (checkDirection(1, -1)) statusBishopOrQueen = "bottomLeft";
       else if (checkDirection(1, 1)) statusBishopOrQueen = "bottomRight";
+
       else if (checkDirection(0, -1)) statusRookOrQueen = "left";
       else if (checkDirection(0, 1)) statusRookOrQueen = "right";
       else if (checkDirection(-1, 0)) statusRookOrQueen = "top";
@@ -211,13 +213,13 @@ export const Chess = () => {
 
       switch (statusRookOrQueen) {
         case "left":
-          return resolveDirection(0, 1);
+          return resolveDirection(0, 1, true);
         case "right":
-          return resolveDirection(0, -1);
+          return resolveDirection(0, -1, true);
         case "top":
-          return resolveDirection(1, 0);
+          return resolveDirection(1, 0, true);
         case "bottom":
-          return resolveDirection(-1, 0);
+          return resolveDirection(-1, 0, true);
       }
 
       return false;
@@ -657,8 +659,7 @@ export const Chess = () => {
   };
 
   const isCheck = (
-    kingColor: "white" | "black",
-    isCallIsCheck: boolean = false
+    kingColor: "white" | "black"
   ): boolean => {
     const updatedCells = [...cells];
     let kingPosition: [number, number] | null = null;

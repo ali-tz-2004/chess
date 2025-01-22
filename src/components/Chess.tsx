@@ -352,7 +352,8 @@ export const Chess = () => {
         if (positionsCheckedPiece) {
           let [rowPiceCheck, colPiceCheck] = positionsCheckedPiece.positionPiceCheck;
 
-          if (preventingCheckRookOrQueen(isRow ? i : secondIndex, isRow ? firstIndex : i) || preventingCheckBishopOrQueen(isRow ? i : secondIndex, isRow ? firstIndex : i) || (rowPiceCheck === (isRow ? i : secondIndex) && colPiceCheck === (isRow ? secondIndex : i))) {
+          if (preventingCheckRookOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) || preventingCheckBishopOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) ||
+            (rowPiceCheck === (isRow ? i : secondIndex) && colPiceCheck === (isRow ? secondIndex : i))) {
             cell.isAllowMove = selectedCell.selected;
           }
         } else {

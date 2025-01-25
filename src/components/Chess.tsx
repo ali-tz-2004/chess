@@ -178,7 +178,7 @@ export const Chess = () => {
           }
 
           if (cell?.colorPiece) {
-            if (isRookOrQueenProp ? isRookOrQueen(row, column) : isBishopOrQueen(row, column) && cell.colorPiece !== turn) {
+            if ((isRookOrQueenProp ? isRookOrQueen(row, column) : isBishopOrQueen(row, column)) && cell.colorPiece !== turn) {
               clearAllowMoveAndSelectedList(temp, status);
               return true;
             }
@@ -355,7 +355,7 @@ export const Chess = () => {
           let [rowPiceCheck, colPiceCheck] = positionsCheckedPiece.positionPiceCheck;
 
           if (preventingCheckRookOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) || preventingCheckBishopOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) ||
-            (rowPiceCheck === (isRow ? i : secondIndex) && colPiceCheck === (isRow ? secondIndex : i))) {
+            (rowPiceCheck === (isRow ? i : firstIndex) && colPiceCheck === (isRow ? secondIndex : i))) {
             cell.isAllowMove = selectedCell.selected;
           }
         } else {
@@ -443,6 +443,204 @@ export const Chess = () => {
       }
     };
 
+    const allowMoveKing = (row: number, col: number) => {
+      if (row < firstCell && col >= lastCell) return false;
+      const checkWithBishopOrQueen = () => {
+        let j = col;
+        for (let i = row; i >= firstCell && j >= firstCell; i--, j--) {
+          if (updatedCells[i][j]?.colorPiece) {
+            if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        j = col;
+        for (let i = row; i >= firstCell && j < lastCell; i--, j++) {
+          if (updatedCells[i][j]?.colorPiece) {
+            if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        j = col;
+        for (let i = row; i < lastCell && j < lastCell; i++, j++) {
+          if (updatedCells[i][j]?.colorPiece) {
+            if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        j = col;
+        for (let i = row; i < lastCell && j >= lastCell; i++, j--) {
+          if (updatedCells[i][j]?.colorPiece) {
+            if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        return false;
+      }
+
+      const checkWithRookOrQueen = () => {
+        for (let i = row; i >= firstCell; i--) {
+          if (updatedCells[i][col]?.colorPiece && i !== row) {
+            if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        for (let i = row; i < lastCell; i++) {
+          if (updatedCells[row][i]?.colorPiece && i !== row) {
+            if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        for (let i = row; i < lastCell; i++) {
+          if (updatedCells[i][col]?.colorPiece && i !== row) {
+            if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        for (let i = row; i >= firstCell; i--) {
+          if (updatedCells[row][i]?.colorPiece && i !== row) {
+            if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
+              return true;
+            }
+            break;
+          }
+        }
+
+        return false;
+      }
+
+      const checkWithKnight = () => {
+        debugger;
+
+        let rowTemp = row - 2;
+        let colTemp = col + 1;
+
+        const findKnight = (rowTemp: number, colTemp: number, statusRow: boolean, statusCol: boolean) => {
+          if ((statusRow ? rowTemp < lastCell : rowTemp >= firstCell) && (statusCol ? colTemp < lastCell : colTemp >= firstCell)) {
+            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Knight") {
+              return true;
+            }
+          }
+        }
+
+        const reset = () => {
+          rowTemp = row;
+          colTemp = col;
+        }
+
+        if (findKnight(rowTemp, colTemp, false, true)) return true;
+        reset();
+
+        rowTemp = row - 2;
+        colTemp = col - 1;
+        if (findKnight(rowTemp, colTemp, false, false)) return true;
+        reset();
+
+        rowTemp = row - 1;
+        colTemp = col - 2;
+        if (findKnight(rowTemp, colTemp, false, false)) return true;
+        reset();
+
+        rowTemp = row - 1;
+        colTemp = col + 2;
+        if (findKnight(rowTemp, colTemp, false, true)) return true;
+        reset();
+
+        rowTemp = row + 1;
+        colTemp = col + 2;
+        if (findKnight(rowTemp, colTemp, true, true)) return true;
+        reset();
+
+        rowTemp = row + 2;
+        colTemp = col + 1;
+        if (findKnight(rowTemp, colTemp, true, true)) return true;
+        reset();
+
+        rowTemp = row + 2;
+        colTemp = col - 1;
+        if (findKnight(rowTemp, colTemp, true, false)) return true;
+        reset();
+
+        rowTemp = row + 1;
+        colTemp = col - 1;
+        if (findKnight(rowTemp, colTemp, true, false)) return true;
+        reset();
+
+        return false;
+      }
+
+      const checkWithPawn = () => {
+        if (turn === "white") {
+          let rowTemp = row - 1;
+          let colTemp = col + 1;
+
+          if (rowTemp > firstCell && colTemp < lastCell) {
+            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Pawn") {
+              return true;
+            }
+          }
+
+          rowTemp = row - 1;
+          colTemp = col - 1;
+
+          if (rowTemp >= firstCell && colTemp >= firstCell) {
+            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Pawn") {
+              return true;
+            }
+          }
+        } else {
+          let rowTemp = row + 1;
+          let colTemp = col + 1;
+
+          if (rowTemp < lastCell && colTemp < lastCell) {
+            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Pawn") {
+              return true;
+            }
+          }
+
+          rowTemp = row + 1;
+          colTemp = col - 1;
+
+          if (rowTemp < lastCell && colTemp >= firstCell) {
+            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Pawn") {
+              return true;
+            }
+          }
+        }
+
+        return false;
+      }
+
+
+
+      if (checkWithBishopOrQueen()) return true;
+      if (checkWithRookOrQueen()) return true;
+      if (checkWithKnight()) return true;
+      if (checkWithPawn()) return true;
+
+      return false;
+    }
+
     const handleKingMoves = () => {
       const moves = [
         [-1, 0],
@@ -466,7 +664,14 @@ export const Chess = () => {
           newCol < lastCell &&
           updatedCells[newRow][newCol].colorPiece !== turn
         ) {
-          updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+          debugger;
+          if (isAllow) {
+            if (!allowMoveKing(newRow, newCol)) {
+              updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+            }
+          } else {
+            updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+          }
         }
       });
 
@@ -477,17 +682,30 @@ export const Chess = () => {
           !updatedCells[firstIndex][secondIndex - 2].piece &&
           !updatedCells[firstIndex][secondIndex - 1].piece
         ) {
-          updatedCells[firstIndex][secondIndex - 2].isAllowMove =
-            selectedCell.selected;
+          if (isAllow) {
+            if (!allowMoveKing(firstIndex, secondIndex - 2)) {
+              updatedCells[firstIndex][secondIndex - 2].isAllowMove =
+                selectedCell.selected;
+            }
+          } else {
+            updatedCells[firstIndex][secondIndex - 2].isAllowMove =
+              selectedCell.selected;
+          }
         }
 
         if (
           !updatedCells[firstIndex][secondIndex + 3].isChange &&
           !updatedCells[firstIndex][secondIndex + 2].piece &&
-          !updatedCells[firstIndex][secondIndex + 1].piece
-        ) {
-          updatedCells[firstIndex][secondIndex + 2].isAllowMove =
-            selectedCell.selected;
+          !updatedCells[firstIndex][secondIndex + 1].piece) {
+          if (isAllow) {
+            if (!allowMoveKing(firstIndex, secondIndex + 2)) {
+              updatedCells[firstIndex][secondIndex + 2].isAllowMove =
+                selectedCell.selected;
+            }
+          } else {
+            updatedCells[firstIndex][secondIndex + 2].isAllowMove =
+              selectedCell.selected;
+          }
         }
       }
     };

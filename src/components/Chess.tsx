@@ -448,7 +448,7 @@ export const Chess = () => {
       const checkWithBishopOrQueen = () => {
         let j = col;
         for (let i = row; i >= firstCell && j >= firstCell; i--, j--) {
-          if (updatedCells[i][j]?.colorPiece) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -458,7 +458,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i >= firstCell && j < lastCell; i--, j++) {
-          if (updatedCells[i][j]?.colorPiece) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -468,7 +468,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i < lastCell && j < lastCell; i++, j++) {
-          if (updatedCells[i][j]?.colorPiece) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -478,7 +478,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i < lastCell && j >= lastCell; i++, j--) {
-          if (updatedCells[i][j]?.colorPiece) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -530,61 +530,23 @@ export const Chess = () => {
       }
 
       const checkWithKnight = () => {
-        debugger;
 
-        let rowTemp = row - 2;
-        let colTemp = col + 1;
+        const knightMoves = [
+          [-2, 1], [-2, -1], [-1, -2], [-1, 2],
+          [1, 2], [2, 1], [2, -1], [1, -1]
+        ];
 
-        const findKnight = (rowTemp: number, colTemp: number, statusRow: boolean, statusCol: boolean) => {
-          if ((statusRow ? rowTemp < lastCell : rowTemp >= firstCell) && (statusCol ? colTemp < lastCell : colTemp >= firstCell)) {
-            if (updatedCells[rowTemp][colTemp].colorPiece === enemyColor && updatedCells[rowTemp][colTemp].piece === "Knight") {
-              return true;
-            }
+        for (let i = 0; i < knightMoves.length; i++) {
+          const [moveRow, moveCol] = knightMoves[i];
+          const rowTemp = row + moveRow;
+          const colTemp = col + moveCol;
+
+          if ((rowTemp >= lastCell || rowTemp < firstCell) && (colTemp >= lastCell || colTemp < firstCell)) continue;
+
+          if (updatedCells[rowTemp][colTemp]?.colorPiece === enemyColor && updatedCells[rowTemp][colTemp]?.piece === "Knight") {
+            return true;
           }
         }
-
-        const reset = () => {
-          rowTemp = row;
-          colTemp = col;
-        }
-
-        if (findKnight(rowTemp, colTemp, false, true)) return true;
-        reset();
-
-        rowTemp = row - 2;
-        colTemp = col - 1;
-        if (findKnight(rowTemp, colTemp, false, false)) return true;
-        reset();
-
-        rowTemp = row - 1;
-        colTemp = col - 2;
-        if (findKnight(rowTemp, colTemp, false, false)) return true;
-        reset();
-
-        rowTemp = row - 1;
-        colTemp = col + 2;
-        if (findKnight(rowTemp, colTemp, false, true)) return true;
-        reset();
-
-        rowTemp = row + 1;
-        colTemp = col + 2;
-        if (findKnight(rowTemp, colTemp, true, true)) return true;
-        reset();
-
-        rowTemp = row + 2;
-        colTemp = col + 1;
-        if (findKnight(rowTemp, colTemp, true, true)) return true;
-        reset();
-
-        rowTemp = row + 2;
-        colTemp = col - 1;
-        if (findKnight(rowTemp, colTemp, true, false)) return true;
-        reset();
-
-        rowTemp = row + 1;
-        colTemp = col - 1;
-        if (findKnight(rowTemp, colTemp, true, false)) return true;
-        reset();
 
         return false;
       }
@@ -631,12 +593,40 @@ export const Chess = () => {
         return false;
       }
 
+      const checkWithKing = () => {
+        const moves = [
+          [-1, -1],
+          [-1, 0],
+          [-1, 1],
+          [0, -1],
+          [0, 1],
+          [1, -1],
+          [1, 0],
+          [1, 1],
+        ]
+
+        for (let i = 0; i < moves.length; i++) {
+          const [moveRow, moveCol] = moves[i];
+          const rowTemp = row + moveRow;
+          const colTemp = col + moveCol;
+
+          if ((rowTemp >= lastCell || rowTemp < firstCell) && (colTemp >= lastCell || colTemp < firstCell)) continue;
+
+          if (updatedCells[rowTemp][colTemp]?.piece === "King" && updatedCells[rowTemp][colTemp]?.colorPiece === enemyColor) {
+            return true;
+          }
+        }
+
+        return false;
+      }
+
 
 
       if (checkWithBishopOrQueen()) return true;
       if (checkWithRookOrQueen()) return true;
       if (checkWithKnight()) return true;
       if (checkWithPawn()) return true;
+      if (checkWithKing()) return true;
 
       return false;
     }
@@ -664,7 +654,6 @@ export const Chess = () => {
           newCol < lastCell &&
           updatedCells[newRow][newCol].colorPiece !== turn
         ) {
-          debugger;
           if (isAllow) {
             if (!allowMoveKing(newRow, newCol)) {
               updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;

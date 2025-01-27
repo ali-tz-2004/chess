@@ -9,6 +9,8 @@ import {
 } from "../data/Piece";
 
 
+
+
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
 export interface CellType {
@@ -449,7 +451,7 @@ export const Chess = () => {
       const checkWithBishopOrQueen = () => {
         let j = col;
         for (let i = row; i >= firstCell && j >= firstCell; i--, j--) {
-          if (updatedCells[i][j]?.colorPiece && row !== i) {
+          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -459,7 +461,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i >= firstCell && j < lastCell; i--, j++) {
-          if (updatedCells[i][j]?.colorPiece && row !== i) {
+          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -469,7 +471,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i < lastCell && j < lastCell; i++, j++) {
-          if (updatedCells[i][j]?.colorPiece && row !== i) {
+          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -479,7 +481,7 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i < lastCell && j >= lastCell; i++, j--) {
-          if (updatedCells[i][j]?.colorPiece && row !== i) {
+          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -492,7 +494,7 @@ export const Chess = () => {
 
       const checkWithRookOrQueen = () => {
         for (let i = row; i >= firstCell; i--) {
-          if (updatedCells[i][col]?.colorPiece && i !== row) {
+          if (updatedCells[i][col]?.colorPiece && i !== row && i !== firstIndex) {
             if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
               return true;
             }
@@ -501,7 +503,7 @@ export const Chess = () => {
         }
 
         for (let i = row; i < lastCell; i++) {
-          if (updatedCells[row][i]?.colorPiece && i !== row) {
+          if (updatedCells[row][i]?.colorPiece && i !== row && i !== firstIndex) {
             if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
               return true;
             }
@@ -510,7 +512,7 @@ export const Chess = () => {
         }
 
         for (let i = row; i < lastCell; i++) {
-          if (updatedCells[i][col]?.colorPiece && i !== row) {
+          if (updatedCells[i][col]?.colorPiece && i !== row && i !== firstIndex) {
             if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
               return true;
             }
@@ -519,7 +521,7 @@ export const Chess = () => {
         }
 
         for (let i = row; i >= firstCell; i--) {
-          if (updatedCells[row][i]?.colorPiece && i !== row) {
+          if (updatedCells[row][i]?.colorPiece && i !== row && i !== firstIndex) {
             if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
               return true;
             }
@@ -533,8 +535,14 @@ export const Chess = () => {
       const checkWithKnight = () => {
 
         const knightMoves = [
-          [-2, 1], [-2, -1], [-1, -2], [-1, 2],
-          [1, 2], [2, 1], [2, -1], [1, -1]
+          [-2, 1],
+          [-2, -1],
+          [-1, -2],
+          [-1, 2],
+          [1, 2],
+          [1, -2],
+          [2, 1],
+          [2, -1]
         ];
 
         for (let i = 0; i < knightMoves.length; i++) {
@@ -648,19 +656,28 @@ export const Chess = () => {
         const newRow = firstIndex + rowOffset;
         const newCol = secondIndex + colOffset;
 
-        if (
-          newRow >= firstCell &&
-          newRow < lastCell &&
-          newCol >= firstCell &&
-          newCol < lastCell &&
-          updatedCells[newRow][newCol].colorPiece !== turn
-        ) {
+        const handleIsActive = () => {
           if (isAllow) {
             if (!allowMoveKing(newRow, newCol)) {
               updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
             }
           } else {
             updatedCells[newRow][newCol].isAllowMove = selectedCell.selected;
+          }
+        }
+
+        if (
+          newRow >= firstCell &&
+          newRow < lastCell &&
+          newCol >= firstCell &&
+          newCol < lastCell
+        ) {
+          if (updatedCells[newRow][newCol]?.piece) {
+            if (updatedCells[newRow][newCol]?.colorPiece !== turn) {
+              handleIsActive();
+            }
+          } else {
+            handleIsActive();
           }
         }
       });

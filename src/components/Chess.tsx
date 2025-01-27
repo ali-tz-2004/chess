@@ -8,6 +8,7 @@ import {
   convertPawPiece,
 } from "../data/Piece";
 
+
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
 export interface CellType {
@@ -541,7 +542,7 @@ export const Chess = () => {
           const rowTemp = row + moveRow;
           const colTemp = col + moveCol;
 
-          if ((rowTemp >= lastCell || rowTemp < firstCell) && (colTemp >= lastCell || colTemp < firstCell)) continue;
+          if ((rowTemp >= lastCell || rowTemp < firstCell) || (colTemp >= lastCell || colTemp < firstCell)) continue;
 
           if (updatedCells[rowTemp][colTemp]?.colorPiece === enemyColor && updatedCells[rowTemp][colTemp]?.piece === "Knight") {
             return true;
@@ -610,7 +611,7 @@ export const Chess = () => {
           const rowTemp = row + moveRow;
           const colTemp = col + moveCol;
 
-          if ((rowTemp >= lastCell || rowTemp < firstCell) && (colTemp >= lastCell || colTemp < firstCell)) continue;
+          if ((rowTemp >= lastCell || rowTemp < firstCell) || (colTemp >= lastCell || colTemp < firstCell)) continue;
 
           if (updatedCells[rowTemp][colTemp]?.piece === "King" && updatedCells[rowTemp][colTemp]?.colorPiece === enemyColor) {
             return true;
@@ -848,7 +849,7 @@ export const Chess = () => {
 
       setCells(cellsCopy);
       setTurn(turn === "white" ? "black" : "white");
-    } else {
+    } else if (cells[firstIndex][secondIndex].piece) {
       setSelected([firstIndex, secondIndex]);
     }
   };

@@ -9,8 +9,6 @@ import {
 } from "../data/Piece";
 
 
-
-
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
 
 export interface CellType {
@@ -354,7 +352,7 @@ export const Chess = () => {
 
         if (cell.piece && cell.colorPiece !== enemyColor) break;
 
-        if (positionsCheckedPiece) {
+        if (positionsCheckedPiece && isAllow) {
           let [rowPiceCheck, colPiceCheck] = positionsCheckedPiece.positionPiceCheck;
 
           if (preventingCheckRookOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) || preventingCheckBishopOrQueen(isRow ? i : firstIndex, isRow ? secondIndex : i) ||
@@ -451,7 +449,8 @@ export const Chess = () => {
       const checkWithBishopOrQueen = () => {
         let j = col;
         for (let i = row; i >= firstCell && j >= firstCell; i--, j--) {
-          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
+            if (updatedCells[i][j].piece === "King") continue;
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -461,7 +460,8 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i >= firstCell && j < lastCell; i--, j++) {
-          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
+            if (updatedCells[i][j].piece === "King") continue;
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -471,7 +471,8 @@ export const Chess = () => {
 
         j = col;
         for (let i = row; i < lastCell && j < lastCell; i++, j++) {
-          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
+            if (updatedCells[i][j].piece === "King") continue;
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -480,8 +481,9 @@ export const Chess = () => {
         }
 
         j = col;
-        for (let i = row; i < lastCell && j >= lastCell; i++, j--) {
-          if (updatedCells[i][j]?.colorPiece && row !== i && i !== firstIndex) {
+        for (let i = row; i < lastCell && j >= firstCell; i++, j--) {
+          if (updatedCells[i][j]?.colorPiece && row !== i) {
+            if (updatedCells[i][j].piece === "King") continue;
             if (updatedCells[i][j].colorPiece === enemyColor && isBishopOrQueen(i, j)) {
               return true;
             }
@@ -494,7 +496,8 @@ export const Chess = () => {
 
       const checkWithRookOrQueen = () => {
         for (let i = row; i >= firstCell; i--) {
-          if (updatedCells[i][col]?.colorPiece && i !== row && i !== firstIndex) {
+          if (updatedCells[i][col]?.colorPiece && i !== row) {
+            if (updatedCells[i][col].piece === "King") continue;
             if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
               return true;
             }
@@ -502,8 +505,9 @@ export const Chess = () => {
           }
         }
 
-        for (let i = row; i < lastCell; i++) {
-          if (updatedCells[row][i]?.colorPiece && i !== row && i !== firstIndex) {
+        for (let i = col; i < lastCell; i++) {
+          if (updatedCells[row][i]?.colorPiece && i !== col) {
+            if (updatedCells[row][i].piece === "King") continue;
             if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
               return true;
             }
@@ -512,7 +516,8 @@ export const Chess = () => {
         }
 
         for (let i = row; i < lastCell; i++) {
-          if (updatedCells[i][col]?.colorPiece && i !== row && i !== firstIndex) {
+          if (updatedCells[i][col]?.colorPiece && i !== row) {
+            if (updatedCells[i][col].piece === "King") continue;
             if (updatedCells[i][col].colorPiece === enemyColor && isRookOrQueen(i, col)) {
               return true;
             }
@@ -520,8 +525,9 @@ export const Chess = () => {
           }
         }
 
-        for (let i = row; i >= firstCell; i--) {
-          if (updatedCells[row][i]?.colorPiece && i !== row && i !== firstIndex) {
+        for (let i = col; i >= firstCell; i--) {
+          if (updatedCells[row][i]?.colorPiece && i !== col) {
+            if (updatedCells[row][i].piece === "King") continue;
             if (updatedCells[row][i].colorPiece === enemyColor && isRookOrQueen(row, i)) {
               return true;
             }
@@ -912,7 +918,7 @@ export const Chess = () => {
     for (let i = 0; i < countRow; i++) {
       for (let j = 0; j < countColumn; j++) {
         const cell = updatedCells[i][j];
-        if (cell.colorPiece === enemyColor) {
+        if (cell?.colorPiece === enemyColor) {
           clearAllowMoveAndSelected();
           updatePieceAllowMove(i, j, false);
 
@@ -922,6 +928,7 @@ export const Chess = () => {
               positionPiceCheck: [i, j],
             };
             updatedCells[kingRow][kingCol].isCheck = true;
+            clearAllowMoveAndSelected(kingRow, kingCol, true);
             isKingInCheck = true;
           }
         }

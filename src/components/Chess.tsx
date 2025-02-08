@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BorderChess } from "./BorderChess";
 import { ChessPiece } from "./ChessPiece";
 import { Images } from "../assets/images/images";
@@ -7,6 +7,7 @@ import {
   initialPieceColors,
   convertPawPiece,
 } from "../data/Piece";
+import { Popup } from "./Popup";
 
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
@@ -405,6 +406,7 @@ export const Chess = () => {
     };
 
     const handleBishopMoves = (rowStep: number, colStep: number) => {
+      debugger;
       let row = firstIndex;
       let col = secondIndex;
 
@@ -759,7 +761,7 @@ export const Chess = () => {
       return;
     }
 
-    if (isAllow) if (validAllowMove(selectedCell.selected)) {
+    if (isAllow && !positionsCheckedPiece) if (validAllowMove(selectedCell.selected)) {
       return;
     }
 
@@ -946,50 +948,98 @@ export const Chess = () => {
     initialBase();
   }, []);
 
+  const [isEnd, setIsEnd] = useState(false);
+  const hasRunRef = useRef(false);
+
+  useEffect(() => {
+    if (positionsCheckedPiece && !hasRunRef.current) {
+      hasRunRef.current = true;
+      let isAllowMove = false;
+      updatePieceAllowMove(positionsCheckedPiece.positionKing[0], positionsCheckedPiece.positionKing[1], true);
+
+      for (let i = 0; i < 8; i++) {
+        for (let j = 0; j < 8; j++) {
+          if (cells[i][j].isAllowMove) {
+            isAllowMove = true;
+            break;
+          }
+        }
+      }
+
+      clearAllowMoveAndSelected();
+      setIsEnd(!isAllowMove);
+    }
+    if (!positionsCheckedPiece) {
+      hasRunRef.current = false;
+    }
+  }, [cells, positionsCheckedPiece])
+
+  const resetGame = () => {
+    clearAllowMoveAndSelected();
+    setTurn("white");
+    setSelected([]);
+    setPositionsCheckedPiece(undefined);
+    hasRunRef.current = false;
+    initialBase();
+    setIsEnd(false);
+  }
+
   return (
-    <div
-      className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative `}
-    >
-      {cells.map((cellChildren, firstIndex) =>
-        cellChildren.map((x, secondIndex) => (
-          <div
-            key={x.id}
-            className={`${x.bgColor
-              } w-full h-full flex items-center justify-center relative ${x.isAllowMove ? "cursor-pointer" : ""
-              } `}
-            onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
-          >
-            {x.isAllowMove ? (
-              <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
-            ) : null}
-            {x.piece && x.colorPiece && (
-              <div
-                className={`${x.colorPiece === turn ? "cursor-pointer" : ""}  ${x.selected ? "bg-blue-400" : ""
-                  }${x.isCheck ? "bg-red-400" : ""}`}
-                onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
-              >
-                <ChessPiece piece={x.piece} color={x.colorPiece} />
-              </div>
-            )}
-            {x.isUpdatePice ? (
-              <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
-                {convertPawPiece.map((y) => (
-                  <div
-                    onClick={() => updatePow(firstIndex, secondIndex, y)}
-                    className="pointer"
-                  >
-                    <ChessPiece
-                      piece={y}
-                      color={turn === "black" ? "white" : "black"}
-                    />
-                  </div>
-                ))}
-              </div>
-            ) : null}
-          </div>
-        ))
+    <>
+      <div
+        className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative `}
+      >
+        {cells.map((cellChildren, firstIndex) =>
+          cellChildren.map((x, secondIndex) => (
+            <div
+              key={x.id}
+              className={`${x.bgColor
+                } w-full h-full flex items-center justify-center relative ${x.isAllowMove ? "cursor-pointer" : ""
+                } `}
+              onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
+            >
+              {x.isAllowMove ? (
+                <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
+              ) : null}
+              {x.piece && x.colorPiece && (
+                <div
+                  className={`
+                  ${x.colorPiece === turn ? "cursor-pointer" : ""} 
+                  ${x.selected && !x.isCheck ? "bg-blue-500" : ""} 
+                  ${x.isCheck && x.selected ? "bg-purple-500" : ""} 
+                  ${x.isCheck && !x.selected ? "bg-red-400" : ""}
+                  `
+                  }
+                  onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
+                >
+                  <ChessPiece piece={x.piece} color={x.colorPiece} />
+                </div>
+              )}
+              {x.isUpdatePice ? (
+                <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
+                  {convertPawPiece.map((y) => (
+                    <div
+                      onClick={() => updatePow(firstIndex, secondIndex, y)}
+                      className="pointer"
+                    >
+                      <ChessPiece
+                        piece={y}
+                        color={turn === "black" ? "white" : "black"}
+                      />
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+            </div>
+          ))
+        )}
+        <BorderChess />
+      </div>
+      {isEnd && (
+        <div className="flex flex-col items-center justify-center h-screen">
+          <Popup title="end game" description={`${turn === "white" ? "black": "white"} is win`} messageClose="reset" isOpen={isEnd} onClose={resetGame} />
+        </div>
       )}
-      <BorderChess />
-    </div>
+    </>
   );
 };

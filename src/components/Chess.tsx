@@ -761,7 +761,7 @@ export const Chess = () => {
       return;
     }
 
-    if (isAllow && !positionsCheckedPiece) if (validAllowMove(selectedCell.selected)) {
+    if (isAllow) if (validAllowMove(selectedCell.selected)) {
       return;
     }
 

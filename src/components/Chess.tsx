@@ -406,7 +406,6 @@ export const Chess = () => {
     };
 
     const handleBishopMoves = (rowStep: number, colStep: number) => {
-      debugger;
       let row = firstIndex;
       let col = secondIndex;
 
@@ -944,6 +943,7 @@ export const Chess = () => {
     return isKingInCheck;
   };
 
+
   useEffect(() => {
     initialBase();
   }, []);
@@ -954,21 +954,39 @@ export const Chess = () => {
   useEffect(() => {
     if (positionsCheckedPiece && !hasRunRef.current) {
       hasRunRef.current = true;
-      let isAllowMove = false;
       updatePieceAllowMove(positionsCheckedPiece.positionKing[0], positionsCheckedPiece.positionKing[1], true);
+      
+      const checkForAllowMoves = () => {
+        for (let i = 0; i < 8; i++) {
+          for (let j = 0; j < 8; j++) {
+            if (cells[i][j].isAllowMove) {
+              return true; 
+            }
+          }
+        }
+        return false; 
+      };
+
+      if(checkForAllowMoves()) {
+        setIsEnd(false);
+        clearAllowMoveAndSelected();
+        return;
+      }
 
       for (let i = 0; i < 8; i++) {
         for (let j = 0; j < 8; j++) {
-          if (cells[i][j].isAllowMove) {
-            isAllowMove = true;
-            break;
+          if (cells[i][j]?.colorPiece === turn) updatePieceAllowMove(i, j, true); 
+          if(checkForAllowMoves()) {
+            setIsEnd(false);
+            clearAllowMoveAndSelected();
+            return;
           }
         }
       }
 
-      clearAllowMoveAndSelected();
-      setIsEnd(!isAllowMove);
+      setIsEnd(true);
     }
+    
     if (!positionsCheckedPiece) {
       hasRunRef.current = false;
     }
@@ -982,6 +1000,10 @@ export const Chess = () => {
     hasRunRef.current = false;
     initialBase();
     setIsEnd(false);
+  }
+
+  const closePopup = () => {
+    setIsEnd(!isEnd);
   }
 
   return (
@@ -1037,7 +1059,9 @@ export const Chess = () => {
       </div>
       {isEnd && (
         <div className="flex flex-col items-center justify-center h-screen">
-          <Popup title="end game" description={`${turn === "white" ? "black": "white"} is win`} messageClose="reset" isOpen={isEnd} onClose={resetGame} />
+          <Popup title="end game" description={`${turn === "white" ? "black": "white"} is win`} messageClose="close" isOpen={isEnd} onClose={closePopup}
+          messageReset="reset" onReset={resetGame}
+           />
         </div>
       )}
     </>

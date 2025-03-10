@@ -8,6 +8,8 @@ import {
   convertPawPiece,
 } from "../data/Piece";
 import { Popup } from "./Popup";
+import useStoreState from "../hooks/useStoreState";
+import store from "storejs";
 
 
 type cellColorType = "bg-cellPrimary" | "bg-cellSecondary";
@@ -30,8 +32,8 @@ export interface PositionsCheckedPiece {
 }
 
 export const Chess = () => {
-  const [cells, setCells] = useState<CellType[][]>([]);
-  const [turn, setTurn] = useState<keyof typeof Images>("white");
+  const [cells, setCells] = useStoreState<CellType[][]>("cells",[]);
+  const [turn, setTurn] = useStoreState<keyof typeof Images>("turn","white");
   const [selected, setSelected] = useState<number[]>([]);
   const [positionsCheckedPiece, setPositionsCheckedPiece] = useState<PositionsCheckedPiece | undefined>();
 
@@ -768,6 +770,13 @@ export const Chess = () => {
   };
 
   const initialBase = () => {
+    const storedCells = store.get("cells") as CellType[][];
+
+    if(storedCells && storedCells.length > 0) {
+      setCells(store.get("cells"));
+      setTurn(store.get("turn"));
+      return;
+    }
     let tempList: CellType[][] = [];
     let id = 1;
 
@@ -998,6 +1007,8 @@ export const Chess = () => {
     setSelected([]);
     setPositionsCheckedPiece(undefined);
     hasRunRef.current = false;
+    store.remove("turn");
+    store.remove("cells")
     initialBase();
     setIsEnd(false);
   }

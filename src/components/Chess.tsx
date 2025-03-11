@@ -881,7 +881,9 @@ export const Chess = () => {
       }
 
       setCells(cellsCopy);
-      setTurn(turn === "white" ? "black" : "white");
+      if(!cellsCopy[firstIndex][secondIndex].isUpdatePice){
+        setTurn(turn === "white" ? "black" : "white");
+      }
     } else if (cells[firstIndex][secondIndex].piece) {
       setSelected([firstIndex, secondIndex]);
     }
@@ -897,12 +899,15 @@ export const Chess = () => {
     cells[firstIndex][secondIndex].isUpdatePice = false;
 
     setCells(cellsCopy);
+    isCheck(turn === "white" ? "black" : "white");
+    setTurn(turn === "white" ? "black" : "white");
   };
 
   const isCheck = (
-    kingColor: "white" | "black"
+    kingColor: "white" | "black",
+    cellsParams: CellType[][] | undefined = undefined
   ): boolean => {
-    const updatedCells = [...cells];
+    const updatedCells = cellsParams ? cellsParams: [...cells];
     let kingPosition: [number, number] | null = null;
 
     for (let i = 0; i < countRow; i++) {
@@ -949,6 +954,8 @@ export const Chess = () => {
 
     clearAllowMoveAndSelected();
 
+    if(cellsParams) setCells(updatedCells);
+
     return isKingInCheck;
   };
 
@@ -960,21 +967,21 @@ export const Chess = () => {
   const [isEnd, setIsEnd] = useState(false);
   const hasRunRef = useRef(false);
 
+  const checkForAllowMoves = () => {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (cells[i][j].isAllowMove) {
+          return true;
+        }
+      }
+    }
+    return false;
+  };
+
   useEffect(() => {
     if (positionsCheckedPiece && !hasRunRef.current) {
       hasRunRef.current = true;
       updatePieceAllowMove(positionsCheckedPiece.positionKing[0], positionsCheckedPiece.positionKing[1], true);
-
-      const checkForAllowMoves = () => {
-        for (let i = 0; i < 8; i++) {
-          for (let j = 0; j < 8; j++) {
-            if (cells[i][j].isAllowMove) {
-              return true;
-            }
-          }
-        }
-        return false;
-      };
 
       if (checkForAllowMoves()) {
         setIsEnd(false);
@@ -1000,6 +1007,7 @@ export const Chess = () => {
       hasRunRef.current = false;
     }
   }, [cells, positionsCheckedPiece])
+
 
   const resetGame = () => {
     clearAllowMoveAndSelected();
@@ -1050,14 +1058,15 @@ export const Chess = () => {
               )}
               {x.isUpdatePice ? (
                 <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
-                  {convertPawPiece.map((y) => (
+                  {convertPawPiece.map((y,index) => (
                     <div
                       onClick={() => updatePow(firstIndex, secondIndex, y)}
                       className="pointer"
+                      key={index}
                     >
                       <ChessPiece
                         piece={y}
-                        color={turn === "black" ? "white" : "black"}
+                        color={turn}
                       />
                     </div>
                   ))}
@@ -1067,14 +1076,18 @@ export const Chess = () => {
           ))
         )}
         <BorderChess />
+
       </div>
       {isEnd && (
         <div className="flex flex-col items-center justify-center h-screen">
-          <Popup title="end game" description={`${turn === "white" ? "black" : "white"} is win`} messageClose="close" isOpen={isEnd} onClose={closePopup}
+          <Popup title="end game" description={`${turn === "white" ? "The black piece won" : "The white piece won"} `} messageClose="close" isOpen={isEnd} onClose={closePopup}
             messageReset="reset" onReset={resetGame}
           />
         </div>
       )}
+      <button className="mt-4 w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute top-0" onClick={resetGame}>
+          reset game
+        </button>
     </>
   );
 };

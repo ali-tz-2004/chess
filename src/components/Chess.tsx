@@ -32,8 +32,8 @@ export interface PositionsCheckedPiece {
 }
 
 export const Chess = () => {
-  const [cells, setCells] = useStoreState<CellType[][]>("cells",[]);
-  const [turn, setTurn] = useStoreState<keyof typeof Images>("turn","white");
+  const [cells, setCells] = useStoreState<CellType[][]>("cells", []);
+  const [turn, setTurn] = useStoreState<keyof typeof Images>("turn", "white");
   const [selected, setSelected] = useState<number[]>([]);
   const [positionsCheckedPiece, setPositionsCheckedPiece] = useState<PositionsCheckedPiece | undefined>();
 
@@ -772,7 +772,7 @@ export const Chess = () => {
   const initialBase = () => {
     const storedCells = store.get("cells") as CellType[][];
 
-    if(storedCells && storedCells.length > 0) {
+    if (storedCells && storedCells.length > 0) {
       setCells(store.get("cells"));
       setTurn(store.get("turn"));
       return;
@@ -881,7 +881,7 @@ export const Chess = () => {
       }
 
       setCells(cellsCopy);
-      if(!cellsCopy[firstIndex][secondIndex].isUpdatePice){
+      if (!cellsCopy[firstIndex][secondIndex].isUpdatePice) {
         setTurn(turn === "white" ? "black" : "white");
       }
     } else if (cells[firstIndex][secondIndex].piece) {
@@ -907,7 +907,7 @@ export const Chess = () => {
     kingColor: "white" | "black",
     cellsParams: CellType[][] | undefined = undefined
   ): boolean => {
-    const updatedCells = cellsParams ? cellsParams: [...cells];
+    const updatedCells = cellsParams ? cellsParams : [...cells];
     let kingPosition: [number, number] | null = null;
 
     for (let i = 0; i < countRow; i++) {
@@ -954,7 +954,7 @@ export const Chess = () => {
 
     clearAllowMoveAndSelected();
 
-    if(cellsParams) setCells(updatedCells);
+    if (cellsParams) setCells(updatedCells);
 
     return isKingInCheck;
   };
@@ -965,7 +965,9 @@ export const Chess = () => {
   }, []);
 
   const [isEnd, setIsEnd] = useState(false);
+  const [isEqual, setIsEqual] = useState(false);
   const hasRunRef = useRef(false);
+
 
   const checkForAllowMoves = () => {
     for (let i = 0; i < 8; i++) {
@@ -1008,6 +1010,23 @@ export const Chess = () => {
     }
   }, [cells, positionsCheckedPiece])
 
+  const equalStalemate = () => {
+    for (let i = 0; i < 8; i++) {
+      for (let j = 0; j < 8; j++) {
+        if (cells[i][j]?.colorPiece === turn) updatePieceAllowMove(i, j, true);
+        if (checkForAllowMoves()) {
+          clearAllowMoveAndSelected();
+          setIsEqual(false);
+          return;
+        }
+      }
+    }
+    setIsEqual(true);
+  };
+
+  useEffect(() => {
+    equalStalemate();
+  }, [setCells, turn]);
 
   const resetGame = () => {
     clearAllowMoveAndSelected();
@@ -1019,10 +1038,12 @@ export const Chess = () => {
     store.remove("cells")
     initialBase();
     setIsEnd(false);
+    setIsEqual(false);
   }
 
   const closePopup = () => {
-    setIsEnd(!isEnd);
+    setIsEnd(false);
+    setIsEqual(false);
   }
 
   return (
@@ -1058,7 +1079,7 @@ export const Chess = () => {
               )}
               {x.isUpdatePice ? (
                 <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
-                  {convertPawPiece.map((y,index) => (
+                  {convertPawPiece.map((y, index) => (
                     <div
                       onClick={() => updatePow(firstIndex, secondIndex, y)}
                       className="pointer"
@@ -1078,16 +1099,17 @@ export const Chess = () => {
         <BorderChess />
 
       </div>
-      {isEnd && (
+
+      {(isEnd || isEqual) && (
         <div className="flex flex-col items-center justify-center h-screen">
-          <Popup title="end game" description={`${turn === "white" ? "The black piece won" : "The white piece won"} `} messageClose="close" isOpen={isEnd} onClose={closePopup}
+          <Popup title="end game" description={`${!isEqual ? turn === "white" ? "The black piece won" : "The white piece won" : "The game was tied."} `} messageClose="close" isOpen={isEnd || isEqual} onClose={closePopup}
             messageReset="reset" onReset={resetGame}
           />
         </div>
       )}
       <button className="mt-4 w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute top-0" onClick={resetGame}>
-          reset game
-        </button>
+        reset game
+      </button>
     </>
   );
 };

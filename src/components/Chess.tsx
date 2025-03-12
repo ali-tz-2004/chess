@@ -1024,8 +1024,46 @@ export const Chess = () => {
     setIsEqual(true);
   };
 
+  const isInsufficientMaterial = (): boolean => {
+    let whitePieces: string[] = [];
+    let blackPieces: string[] = [];
+
+    for (let row of cells) {
+        for (let cell of row) {
+            if (cell.piece) {
+                if (cell.colorPiece === "white") {
+                    whitePieces.push(cell.piece);
+                } else if (cell.colorPiece === "black") {
+                    blackPieces.push(cell.piece);
+                }
+            }
+        }
+    }
+
+    const hasOnlyKingAnd = (pieces: string[], allowed: string[]) => {
+        return pieces.length === 1 || (pieces.length === 2 && allowed.includes(pieces[1]));
+    };
+
+    if (
+        (hasOnlyKingAnd(whitePieces, ["Bishop", "Knight"]) && blackPieces.length === 1) ||
+        (hasOnlyKingAnd(blackPieces, ["Bishop", "Knight"]) && whitePieces.length === 1)
+    ) {
+        return true;
+    }
+
+    if (whitePieces.length === 3 && whitePieces.filter(p => p === "Knight").length === 2 && blackPieces.length === 1) {
+        return true;
+    }
+    if (blackPieces.length === 3 && blackPieces.filter(p => p === "Knight").length === 2 && whitePieces.length === 1) {
+        return true;
+    }
+
+    return false; 
+  }
+
   useEffect(() => {
     equalStalemate();
+    setIsEqual(isInsufficientMaterial())
   }, [setCells, turn]);
 
   const resetGame = () => {

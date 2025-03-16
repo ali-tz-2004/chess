@@ -36,6 +36,8 @@ export const Chess = () => {
   const [turn, setTurn] = useStoreState<keyof typeof Images>("turn", "white");
   const [selected, setSelected] = useState<number[]>([]);
   const [positionsCheckedPiece, setPositionsCheckedPiece] = useState<PositionsCheckedPiece | undefined>();
+  const [moveCount, setMoveCount] = useState(0);
+  const [isClose, setIsClose] = useState(false);
 
   const countRow = 8;
   const countColumn = 8;
@@ -89,6 +91,8 @@ export const Chess = () => {
 
 
   const updatePieceAllowMove = (firstIndex: number, secondIndex: number, isAllow: boolean = true) => {
+    if(isClose) return;
+    
     let updatedCells = [...cells];
 
     const selectedCell = updatedCells[firstIndex][secondIndex];
@@ -818,6 +822,9 @@ export const Chess = () => {
   ): void => {
     if (isAllowMove) {
       const cellsCopy = [...cells];
+
+      updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
+
       cellsCopy[firstIndex][secondIndex].piece =
         cellsCopy[selected[0]][selected[1]].piece;
       cellsCopy[selected[0]][selected[1]].piece = null;
@@ -888,6 +895,14 @@ export const Chess = () => {
       setSelected([firstIndex, secondIndex]);
     }
   };
+
+  const updateMoveCount = (from: CellType, to: CellType) =>{
+    if (from.piece === "Pawn" || to.piece !== null) {
+        setMoveCount(0);
+    } else {
+        setMoveCount(prev => prev + 1);
+    }
+  }
 
   const updatePow = (
     firstIndex: number,
@@ -1066,6 +1081,12 @@ export const Chess = () => {
     setIsEqual(isInsufficientMaterial())
   }, [setCells, turn]);
 
+  useEffect(() => {
+    if(moveCount === 50){
+      setIsEqual(true);
+    }
+  }, [moveCount]);
+
   const resetGame = () => {
     clearAllowMoveAndSelected();
     setTurn("white");
@@ -1080,6 +1101,7 @@ export const Chess = () => {
   }
 
   const closePopup = () => {
+    setIsClose(true);
     setIsEnd(false);
     setIsEqual(false);
   }

@@ -698,6 +698,7 @@ export const Chess = () => {
       if (!selectedCell.isChange && !positionsCheckedPiece) {
         if (
           !updatedCells[firstIndex][secondIndex - 4].isChange &&
+          updatedCells[firstIndex][secondIndex - 4].piece &&
           !updatedCells[firstIndex][secondIndex - 3].piece &&
           !updatedCells[firstIndex][secondIndex - 2].piece &&
           !updatedCells[firstIndex][secondIndex - 1].piece
@@ -715,6 +716,7 @@ export const Chess = () => {
 
         if (
           !updatedCells[firstIndex][secondIndex + 3].isChange &&
+          updatedCells[firstIndex][secondIndex + 3].piece &&
           !updatedCells[firstIndex][secondIndex + 2].piece &&
           !updatedCells[firstIndex][secondIndex + 1].piece) {
           if (isAllow) {
@@ -981,7 +983,6 @@ export const Chess = () => {
 
   const [isEnd, setIsEnd] = useState(false);
   const [isEqual, setIsEqual] = useState(false);
-  const hasRunRef = useRef(false);
 
 
   const checkForAllowMoves = () => {
@@ -996,8 +997,7 @@ export const Chess = () => {
   };
 
   useEffect(() => {
-    if (positionsCheckedPiece && !hasRunRef.current) {
-      hasRunRef.current = true;
+    if (positionsCheckedPiece) {
       updatePieceAllowMove(positionsCheckedPiece.positionKing[0], positionsCheckedPiece.positionKing[1], true);
 
       if (checkForAllowMoves()) {
@@ -1019,24 +1019,21 @@ export const Chess = () => {
 
       setIsEnd(true);
     }
-
-    if (!positionsCheckedPiece) {
-      hasRunRef.current = false;
-    }
-  }, [cells, positionsCheckedPiece])
+  }, [setCells, positionsCheckedPiece])
 
   const equalStalemate = () => {
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
-        if (cells[i][j]?.colorPiece === turn) updatePieceAllowMove(i, j, true);
-        if (checkForAllowMoves()) {
-          clearAllowMoveAndSelected();
-          setIsEqual(false);
-          return;
+        if (cells[i][j]?.colorPiece === turn) {
+          updatePieceAllowMove(i, j, true);
+          if (checkForAllowMoves()) {
+            clearAllowMoveAndSelected();
+            return false;
+          }
         }
       }
     }
-    setIsEqual(true);
+    return true;
   };
 
   const isInsufficientMaterial = (): boolean => {
@@ -1077,8 +1074,10 @@ export const Chess = () => {
   }
 
   useEffect(() => {
-    equalStalemate();
-    setIsEqual(isInsufficientMaterial())
+    const isStalemate = equalStalemate();
+    const isInsufficient = isInsufficientMaterial();
+    
+    setIsEqual(isStalemate || isInsufficient);
   }, [setCells, turn]);
 
   useEffect(() => {
@@ -1092,12 +1091,12 @@ export const Chess = () => {
     setTurn("white");
     setSelected([]);
     setPositionsCheckedPiece(undefined);
-    hasRunRef.current = false;
     store.remove("turn");
     store.remove("cells")
     initialBase();
     setIsEnd(false);
     setIsEqual(false);
+    setIsClose(false);
   }
 
   const closePopup = () => {
@@ -1162,7 +1161,14 @@ export const Chess = () => {
 
       {(isEnd || isEqual) && (
         <div className="flex flex-col items-center justify-center h-screen">
-          <Popup title="end game" description={`${!isEqual ? turn === "white" ? "The black piece won" : "The white piece won" : "The game was tied."} `} messageClose="close" isOpen={isEnd || isEqual} onClose={closePopup}
+          <Popup title="end game" 
+          description={isEqual && !isEnd
+            ? "The game was tied." 
+            : turn === "white" 
+              ? "The black piece won" 
+              : "The white piece won"
+          } 
+          messageClose="close" isOpen={isEnd || isEqual} onClose={closePopup}
             messageReset="reset" onReset={resetGame}
           />
         </div>

@@ -10,6 +10,7 @@ import { CellType, PositionsCheckedPiece, cellColorType } from "../type/ChessTyp
 import { checkForAllowMoves, checkUpdatePice, handleBishopMoves, handleKingMoves, handleKnightMoves, handlePawnMoves, handleQueenMoves, handleRookMoves, validAllowMove } from "../utils/Moves";
 import { clearMovesAndSelection } from "../utils/ClearMove";
 import { initialBase } from "../utils/InitialState";
+import { motion,AnimatePresence } from "framer-motion";
 
 export const Chess = () => {
   const [cells, setCells] = useStoreState<CellType[][]>("cells", []);
@@ -365,33 +366,40 @@ export const Chess = () => {
               {x.isAllowMove ? (
                 <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
               ) : null}
-              {x.piece && x.colorPiece && (
-                <div
+              <AnimatePresence>
+                {x.piece && x.colorPiece && (
+                  <motion.div
+                  key={`${x.piece}-${x.colorPiece}-${firstIndex}-${secondIndex}`}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0 }}
+                  transition={{ duration: 0.1 }}
                   className={`
-                  ${x.colorPiece === turn ? "cursor-pointer" : ""} 
-                  ${x.selected && !x.isCheck ? "bg-blue-500" : ""} 
-                  ${x.isCheck && x.selected ? "bg-purple-500" : ""} 
-                  ${x.isCheck && !x.selected ? "bg-red-400" : ""}
-                  `
-                  }
+                    ${x.colorPiece === turn ? "cursor-pointer" : ""} 
+                    ${x.selected && !x.isCheck ? "bg-blue-500" : ""} 
+                    ${x.isCheck && x.selected ? "bg-purple-500" : ""} 
+                    ${x.isCheck && !x.selected ? "bg-red-400" : ""}
+                  `}
                   onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
                 >
                   <ChessPiece piece={x.piece} color={x.colorPiece} />
-                </div>
-              )}
+                </motion.div>
+                )}
+              </AnimatePresence>
+
               {x.isUpdatePice ? (
                 <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
                   {convertPawPiece.map((y, index) => (
-                    <div
-                      onClick={() => updatePow(firstIndex, secondIndex, y)}
-                      className="pointer"
-                      key={index}
-                    >
-                      <ChessPiece
-                        piece={y}
-                        color={turn}
-                      />
-                    </div>
+                    <motion.div
+                    onClick={() => updatePow(firstIndex, secondIndex, y)}
+                    initial={{ opacity: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.1 }}
+                    className="pointer"
+                    key={index}
+                  >
+                    <ChessPiece piece={y} color={turn} />
+                  </motion.div>
                   ))}
                 </div>
               ) : null}
@@ -403,8 +411,13 @@ export const Chess = () => {
       </div>
 
       {(isEnd || isEqual) && (
-        <div className="flex flex-col items-center justify-center h-screen">
-          <Popup title="end game"
+        <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5 }}
+        className="flex flex-col items-center justify-center h-screen"
+      >
+        <Popup title="end game"
             description={isEqual && !isEnd
               ? "The game was tied."
               : turn === "white"
@@ -414,7 +427,7 @@ export const Chess = () => {
             messageClose="close" isOpen={isEnd || isEqual} onClose={closePopup}
             messageReset="reset" onReset={resetGame}
           />
-        </div>
+      </motion.div>
       )}
       <button className="mt-4 w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute top-0" onClick={resetGame}>
         reset game

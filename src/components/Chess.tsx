@@ -6,11 +6,11 @@ import { convertPawPiece } from "../data/Piece";
 import { Popup } from "./Popup";
 import useStoreState from "../hooks/useStoreState";
 import store from "storejs";
-import { CellType, PositionsCheckedPiece, cellColorType } from "../type/ChessTypes";
-import { checkForAllowMoves, checkUpdatePice, handleBishopMoves, handleKingMoves, handleKnightMoves, handlePawnMoves, handleQueenMoves, handleRookMoves, validAllowMove } from "../utils/Moves";
+import { CellType, PositionsCheckedPiece } from "../type/ChessTypes";
+import { checkForAllowMoves, checkPawnPromotion, checkUpdatePice, handleCastling, movePiece, StatusPiece, validAllowMove } from "../utils/Moves";
 import { clearMovesAndSelection } from "../utils/ClearMove";
 import { initialBase } from "../utils/InitialState";
-import { motion,AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 
 export const Chess = () => {
   const [cells, setCells] = useStoreState<CellType[][]>("cells", []);
@@ -42,29 +42,7 @@ export const Chess = () => {
 
     selectedCell.selected = !selectedCell.selected;
 
-    if (selectedCell.piece === "Pawn") {
-      const direction = turn === "black" ? 1 : -1;
-      const startRow = turn === "black" ? 1 : 6;
-      handlePawnMoves(updatedCells, firstIndex, secondIndex, direction, startRow, enemyColor, positionsCheckedPiece);
-    } else if (selectedCell.piece === "Rook") {
-      handleRookMoves(updatedCells, firstIndex, secondIndex, isAllow, firstIndex - 1, -1, true, -1, enemyColor, positionsCheckedPiece); // Up
-      handleRookMoves(updatedCells, firstIndex, secondIndex, isAllow, firstIndex + 1, 8, true, 1, enemyColor, positionsCheckedPiece); // Down
-      handleRookMoves(updatedCells, firstIndex, secondIndex, isAllow, secondIndex + 1, 8, false, 1, enemyColor, positionsCheckedPiece); // Right
-      handleRookMoves(updatedCells, firstIndex, secondIndex, isAllow, secondIndex - 1, -1, false, -1, enemyColor, positionsCheckedPiece); // Left
-    } else if (selectedCell.piece === "Knight") {
-      handleKnightMoves(updatedCells, firstIndex, secondIndex, turn, positionsCheckedPiece);
-    } else if (selectedCell.piece === "Bishop") {
-      handleBishopMoves(updatedCells, firstIndex, secondIndex, -1, -1, turn, enemyColor, positionsCheckedPiece); // Top-left
-      handleBishopMoves(updatedCells, firstIndex, secondIndex, 1, 1, turn, enemyColor, positionsCheckedPiece); // Bottom-right
-      handleBishopMoves(updatedCells, firstIndex, secondIndex, 1, -1, turn, enemyColor, positionsCheckedPiece); // Bottom-left
-      handleBishopMoves(updatedCells, firstIndex, secondIndex, -1, 1, turn, enemyColor, positionsCheckedPiece); // Top-right
-    } else if (selectedCell.piece === "Queen") {
-      handleQueenMoves(updatedCells, firstIndex, secondIndex, isAllow, turn, enemyColor, positionsCheckedPiece);
-    } else if (selectedCell.piece === "King") {
-      handleKingMoves(updatedCells, firstIndex, secondIndex, isAllow, turn, enemyColor, positionsCheckedPiece);
-    } else {
-      return;
-    }
+    StatusPiece(selectedCell, turn, updatedCells, firstIndex, secondIndex, enemyColor, isAllow, positionsCheckedPiece)
 
     if (isAllow) if (validAllowMove(updatedCells, firstIndex, secondIndex, selectedCell.selected, turn, cells, setCells)) {
       return;
@@ -83,64 +61,14 @@ export const Chess = () => {
 
       updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
 
-      cellsCopy[firstIndex][secondIndex].piece =
-        cellsCopy[selected[0]][selected[1]].piece;
-      cellsCopy[selected[0]][selected[1]].piece = null;
-      cellsCopy[selected[0]][selected[1]].colorPiece = null;
-      cellsCopy[firstIndex][secondIndex].colorPiece = turn;
-      cellsCopy[firstIndex][secondIndex].isChange = true;
-
-      if (
-        turn === "white" &&
-        cellsCopy[firstIndex][secondIndex].piece === "King"
-      ) {
-        if (selected[1] - 2 === secondIndex) {
-          cellsCopy[7][0].piece = null;
-          cellsCopy[7][3].piece = "Rook";
-          cellsCopy[7][3].colorPiece = turn;
-        } else if (selected[1] + 2 === secondIndex) {
-          cellsCopy[7][7].piece = null;
-          cellsCopy[7][5].piece = "Rook";
-          cellsCopy[7][5].colorPiece = turn;
-        }
-      }
-
-      if (
-        turn === "black" &&
-        cellsCopy[firstIndex][secondIndex].piece === "King"
-      ) {
-        if (selected[1] - 2 === secondIndex) {
-          cellsCopy[0][0].piece = null;
-          cellsCopy[0][3].piece = "Rook";
-          cellsCopy[0][3].colorPiece = turn;
-        } else if (selected[1] + 2 === secondIndex) {
-          cellsCopy[0][7].piece = null;
-          cellsCopy[0][5].piece = "Rook";
-          cellsCopy[0][5].colorPiece = turn;
-        }
-      }
+      movePiece(cellsCopy, selected, firstIndex, secondIndex, turn);
+      handleCastling(cellsCopy, selected, firstIndex, secondIndex, turn);
 
       clearMovesAndSelection(cells, setCells);
 
-      if (
-        firstIndex === 0 &&
-        turn === "white" &&
-        cellsCopy[firstIndex][secondIndex].piece === "Pawn"
-      ) {
-        cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
-      }
+      checkPawnPromotion(cellsCopy, firstIndex, secondIndex, turn);
 
-      if (
-        firstIndex === 7 &&
-        turn === "black" &&
-        cellsCopy[firstIndex][secondIndex].piece === "Pawn"
-      ) {
-        cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
-      }
-
-      if (isCheck(turn === "white" ? "black" : "white")) {
-        console.log("Check!");
-      } else {
+      if (!isCheck(turn === "white" ? "black" : "white")) {
         clearMovesAndSelection(cells, setCells, undefined, undefined, true);
         setPositionsCheckedPiece(undefined);
       }
@@ -236,7 +164,7 @@ export const Chess = () => {
     initialBase({ setCells, setTurn });
   }, []);
 
-  const gameWinHandler = () =>{
+  const gameWinHandler = () => {
     if (positionsCheckedPiece) {
       updatePieceAllowMove(positionsCheckedPiece.positionKing[0], positionsCheckedPiece.positionKing[1], true);
 
@@ -369,21 +297,21 @@ export const Chess = () => {
               <AnimatePresence>
                 {x.piece && x.colorPiece && (
                   <motion.div
-                  key={`${x.piece}-${x.colorPiece}-${firstIndex}-${secondIndex}`}
-                  initial={{ opacity: 0, scale: 0.8 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0 }}
-                  transition={{ duration: 0.1 }}
-                  className={`
+                    key={`${x.piece}-${x.colorPiece}-${firstIndex}-${secondIndex}`}
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0 }}
+                    transition={{ duration: 0.1 }}
+                    className={`
                     ${x.colorPiece === turn ? "cursor-pointer" : ""} 
                     ${x.selected && !x.isCheck ? "bg-blue-500" : ""} 
                     ${x.isCheck && x.selected ? "bg-purple-500" : ""} 
                     ${x.isCheck && !x.selected ? "bg-red-400" : ""}
                   `}
-                  onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
-                >
-                  <ChessPiece piece={x.piece} color={x.colorPiece} />
-                </motion.div>
+                    onClick={() => updatePieceAllowMove(firstIndex, secondIndex)}
+                  >
+                    <ChessPiece piece={x.piece} color={x.colorPiece} />
+                  </motion.div>
                 )}
               </AnimatePresence>
 
@@ -391,15 +319,15 @@ export const Chess = () => {
                 <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
                   {convertPawPiece.map((y, index) => (
                     <motion.div
-                    onClick={() => updatePow(firstIndex, secondIndex, y)}
-                    initial={{ opacity: 1 }}
-                    exit={{ opacity: 0, scale: 0 }}
-                    transition={{ duration: 0.1 }}
-                    className="pointer"
-                    key={index}
-                  >
-                    <ChessPiece piece={y} color={turn} />
-                  </motion.div>
+                      onClick={() => updatePow(firstIndex, secondIndex, y)}
+                      initial={{ opacity: 1 }}
+                      exit={{ opacity: 0, scale: 0 }}
+                      transition={{ duration: 0.1 }}
+                      className="pointer"
+                      key={index}
+                    >
+                      <ChessPiece piece={y} color={turn} />
+                    </motion.div>
                   ))}
                 </div>
               ) : null}
@@ -412,12 +340,12 @@ export const Chess = () => {
 
       {(isEnd || isEqual) && (
         <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
-        className="flex flex-col items-center justify-center h-screen"
-      >
-        <Popup title="end game"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center h-screen"
+        >
+          <Popup title="end game"
             description={isEqual && !isEnd
               ? "The game was tied."
               : turn === "white"
@@ -427,7 +355,7 @@ export const Chess = () => {
             messageClose="close" isOpen={isEnd || isEqual} onClose={closePopup}
             messageReset="reset" onReset={resetGame}
           />
-      </motion.div>
+        </motion.div>
       )}
       <button className="mt-4 w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute top-0" onClick={resetGame}>
         reset game

@@ -1,4 +1,9 @@
-import { cellColorType, CellType, PositionsCheckedPiece, StatusBishopOrQueenType, StatusRookOrQueenType } from "../type/ChessTypes";
+import {
+  CellType,
+  PositionsCheckedPiece,
+  StatusBishopOrQueenType,
+  StatusRookOrQueenType,
+} from "../type/ChessTypes";
 import {
   preventingCheckRookOrQueen,
   preventingCheckBishopOrQueen,
@@ -28,20 +33,19 @@ export const isBishopOrQueen = (
 };
 
 export const checkUpdatePice = (cells: CellType[][]): boolean => {
-    return cells.some((row) => row.some((cell) => cell.isUpdatePice));
+  return cells.some((row) => row.some((cell) => cell.isUpdatePice));
 };
 
 export const checkForAllowMoves = (cells: CellType[][]) => {
-for (let i = 0; i < 8; i++) {
+  for (let i = 0; i < 8; i++) {
     for (let j = 0; j < 8; j++) {
-    if (cells[i][j].isAllowMove) {
+      if (cells[i][j].isAllowMove) {
         return true;
+      }
     }
-    }
-}
-return false;
+  }
+  return false;
 };
-
 
 export const handlePawnMoves = (
   updatedCells: CellType[][],
@@ -558,143 +562,487 @@ export const handleKingMoves = (
   }
 };
 
-
 const checkDirection = (
-    updatedCells: CellType[][],
-    temp: number[][],
-    firstIndex: number,
-    secondIndex: number,
-    statusRow: number,
-    statusColumn: number,
-    turn: "black" | "white",
-  ): boolean => {
-    let rowIndex = firstIndex;
-    let columnIndex = secondIndex;
-    let tempVirtual: number[][] = [];
+  updatedCells: CellType[][],
+  temp: number[][],
+  firstIndex: number,
+  secondIndex: number,
+  statusRow: number,
+  statusColumn: number,
+  turn: "black" | "white"
+): boolean => {
+  let rowIndex = firstIndex;
+  let columnIndex = secondIndex;
+  let tempVirtual: number[][] = [];
 
-    while (
-      rowIndex + statusRow >= firstCell &&
-      rowIndex + statusRow < lastCell &&
-      columnIndex + statusColumn >= firstCell &&
-      columnIndex + statusColumn < lastCell
-    ) {
-      rowIndex += statusRow;
-      columnIndex += statusColumn;
+  while (
+    rowIndex + statusRow >= firstCell &&
+    rowIndex + statusRow < lastCell &&
+    columnIndex + statusColumn >= firstCell &&
+    columnIndex + statusColumn < lastCell
+  ) {
+    rowIndex += statusRow;
+    columnIndex += statusColumn;
 
-      if (!statusRow || !statusColumn) {
-        if (isRookOrQueen(updatedCells, firstIndex, secondIndex) && !updatedCells[rowIndex][columnIndex].piece) {
-          tempVirtual.push([rowIndex, columnIndex]);
-        }
+    if (!statusRow || !statusColumn) {
+      if (
+        isRookOrQueen(updatedCells, firstIndex, secondIndex) &&
+        !updatedCells[rowIndex][columnIndex].piece
+      ) {
+        tempVirtual.push([rowIndex, columnIndex]);
       }
-
-      else {
-        if (isBishopOrQueen(updatedCells, firstIndex, secondIndex) && !updatedCells[rowIndex][columnIndex].piece) {
-          tempVirtual.push([rowIndex, columnIndex]);
-        }
-      }
-
-
-      const cell = updatedCells[rowIndex][columnIndex];
-      if (cell?.colorPiece) {
-        if (cell.piece === "King" && cell.colorPiece === turn) {
-          temp = temp.concat(tempVirtual);
-          return true;
-        }
-        break;
+    } else {
+      if (
+        isBishopOrQueen(updatedCells, firstIndex, secondIndex) &&
+        !updatedCells[rowIndex][columnIndex].piece
+      ) {
+        tempVirtual.push([rowIndex, columnIndex]);
       }
     }
 
-    tempVirtual = [];
-
-    return false;
-  };
-
-  const resolveDirection = (
-    updatedCells: CellType[][],
-    temp: number[][],
-    firstIndex: number,
-    secondIndex: number,
-    status: boolean,
-    statusRow: number,
-    statusColumn: number,
-    isRookOrQueenProp: boolean = false,
-    turn: "black" | "white",
-    cells: CellType[][],
-    setCells: (cells: CellType[][]) => void
-  ): boolean => {
-    let row = firstIndex;
-    let column = secondIndex;
-
-    temp.unshift([firstIndex, secondIndex]);
-
-    while (
-      row + statusRow >= firstCell &&
-      row + statusRow < lastCell &&
-      column + statusColumn >= firstCell &&
-      column + statusColumn < lastCell
-    ) {
-      row += statusRow;
-      column += statusColumn;
-
-      const cell = updatedCells[row][column];
-
-      if (cell.isAllowMove) {
-        temp.push([row, column]);
+    const cell = updatedCells[rowIndex][columnIndex];
+    if (cell?.colorPiece) {
+      if (cell.piece === "King" && cell.colorPiece === turn) {
+        temp = temp.concat(tempVirtual);
+        return true;
       }
+      break;
+    }
+  }
 
-      if (cell?.colorPiece) {
-        if ((isRookOrQueenProp ? isRookOrQueen(updatedCells, row, column) : isBishopOrQueen(updatedCells, row, column)) && cell.colorPiece !== turn) {
-          updateSelectionAndMoves(temp, status, cells, setCells);//important
-          return true;
-        }
-        return false;
+  tempVirtual = [];
+
+  return false;
+};
+
+const resolveDirection = (
+  updatedCells: CellType[][],
+  temp: number[][],
+  firstIndex: number,
+  secondIndex: number,
+  status: boolean,
+  statusRow: number,
+  statusColumn: number,
+  isRookOrQueenProp: boolean = false,
+  turn: "black" | "white",
+  cells: CellType[][],
+  setCells: (cells: CellType[][]) => void
+): boolean => {
+  let row = firstIndex;
+  let column = secondIndex;
+
+  temp.unshift([firstIndex, secondIndex]);
+
+  while (
+    row + statusRow >= firstCell &&
+    row + statusRow < lastCell &&
+    column + statusColumn >= firstCell &&
+    column + statusColumn < lastCell
+  ) {
+    row += statusRow;
+    column += statusColumn;
+
+    const cell = updatedCells[row][column];
+
+    if (cell.isAllowMove) {
+      temp.push([row, column]);
+    }
+
+    if (cell?.colorPiece) {
+      if (
+        (isRookOrQueenProp
+          ? isRookOrQueen(updatedCells, row, column)
+          : isBishopOrQueen(updatedCells, row, column)) &&
+        cell.colorPiece !== turn
+      ) {
+        updateSelectionAndMoves(temp, status, cells, setCells); //important
+        return true;
       }
+      return false;
     }
+  }
 
-    return false;
-  };
+  return false;
+};
 
-  export const validAllowMove = (updatedCells: CellType[][], firstIndex: number, secondIndex: number,status: boolean, turn: "black" | "white",
-    cells: CellType[][],
-    setCells: (cells: CellType[][]) => void
-  ): boolean => {
-    let statusBishopOrQueen: StatusBishopOrQueenType = null;
-    let statusRookOrQueen: StatusRookOrQueenType = null;
+export const validAllowMove = (
+  updatedCells: CellType[][],
+  firstIndex: number,
+  secondIndex: number,
+  status: boolean,
+  turn: "black" | "white",
+  cells: CellType[][],
+  setCells: (cells: CellType[][]) => void
+): boolean => {
+  let statusBishopOrQueen: StatusBishopOrQueenType = null;
+  let statusRookOrQueen: StatusRookOrQueenType = null;
 
-    let temp: number[][] = [];
+  let temp: number[][] = [];
 
-    // Check all directions for King presence
-    if (checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, -1, turn)) statusBishopOrQueen = "topLeft";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, 1, turn)) statusBishopOrQueen = "topRight";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, -1, turn)) statusBishopOrQueen = "bottomLeft";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, 1, turn)) statusBishopOrQueen = "bottomRight";
+  // Check all directions for King presence
+  if (checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, -1, turn))
+    statusBishopOrQueen = "topLeft";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, 1, turn)
+  )
+    statusBishopOrQueen = "topRight";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, -1, turn)
+  )
+    statusBishopOrQueen = "bottomLeft";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, 1, turn)
+  )
+    statusBishopOrQueen = "bottomRight";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, 0, -1, turn)
+  )
+    statusRookOrQueen = "left";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, 0, 1, turn)
+  )
+    statusRookOrQueen = "right";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, 0, turn)
+  )
+    statusRookOrQueen = "top";
+  else if (
+    checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, 0, turn)
+  )
+    statusRookOrQueen = "bottom";
 
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, 0, -1, turn)) statusRookOrQueen = "left";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, 0, 1, turn)) statusRookOrQueen = "right";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, -1, 0, turn)) statusRookOrQueen = "top";
-    else if (checkDirection(updatedCells, temp, firstIndex, secondIndex, 1, 0, turn)) statusRookOrQueen = "bottom";
+  switch (statusBishopOrQueen) {
+    case "topLeft":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        1,
+        1,
+        false,
+        turn,
+        cells,
+        setCells
+      );
+    case "topRight":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        1,
+        -1,
+        false,
+        turn,
+        cells,
+        setCells
+      );
+    case "bottomLeft":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        -1,
+        1,
+        false,
+        turn,
+        cells,
+        setCells
+      );
+    case "bottomRight":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        -1,
+        -1,
+        false,
+        turn,
+        cells,
+        setCells
+      );
+  }
 
-    switch (statusBishopOrQueen) {
-      case "topLeft":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, 1, 1, false, turn, cells, setCells);
-      case "topRight":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, 1, -1, false, turn, cells, setCells);
-      case "bottomLeft":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, -1, 1, false, turn, cells, setCells);
-      case "bottomRight":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, -1, -1, false, turn, cells, setCells);
+  switch (statusRookOrQueen) {
+    case "left":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        0,
+        1,
+        true,
+        turn,
+        cells,
+        setCells
+      );
+    case "right":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        0,
+        -1,
+        true,
+        turn,
+        cells,
+        setCells
+      );
+    case "top":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        1,
+        0,
+        true,
+        turn,
+        cells,
+        setCells
+      );
+    case "bottom":
+      return resolveDirection(
+        updatedCells,
+        temp,
+        firstIndex,
+        secondIndex,
+        status,
+        -1,
+        0,
+        true,
+        turn,
+        cells,
+        setCells
+      );
+  }
+
+  return false;
+};
+
+export const movePiece = (
+  cellsCopy: CellType[][],
+  selected: number[],
+  firstIndex: number,
+  secondIndex: number,
+  turn: "white" | "black"
+) => {
+  cellsCopy[firstIndex][secondIndex].piece =
+    cellsCopy[selected[0]][selected[1]].piece;
+  cellsCopy[selected[0]][selected[1]].piece = null;
+  cellsCopy[selected[0]][selected[1]].colorPiece = null;
+  cellsCopy[firstIndex][secondIndex].colorPiece = turn;
+  cellsCopy[firstIndex][secondIndex].isChange = true;
+};
+
+export const handleCastling = (
+  cellsCopy: CellType[][],
+  selected: number[],
+  firstIndex: number,
+  secondIndex: number,
+  turn: "white" | "black"
+) => {
+  if (turn === "white" && cellsCopy[firstIndex][secondIndex].piece === "King") {
+    if (selected[1] - 2 === secondIndex) {
+      cellsCopy[7][0].piece = null;
+      cellsCopy[7][3].piece = "Rook";
+      cellsCopy[7][3].colorPiece = turn;
+    } else if (selected[1] + 2 === secondIndex) {
+      cellsCopy[7][7].piece = null;
+      cellsCopy[7][5].piece = "Rook";
+      cellsCopy[7][5].colorPiece = turn;
     }
+  }
 
-    switch (statusRookOrQueen) {
-      case "left":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, 0, 1, true, turn, cells, setCells);
-      case "right":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, 0, -1, true, turn, cells, setCells);
-      case "top":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, 1, 0, true, turn, cells, setCells);
-      case "bottom":
-        return resolveDirection(updatedCells, temp, firstIndex, secondIndex, status, -1, 0, true, turn, cells, setCells);
+  if (turn === "black" && cellsCopy[firstIndex][secondIndex].piece === "King") {
+    if (selected[1] - 2 === secondIndex) {
+      cellsCopy[0][0].piece = null;
+      cellsCopy[0][3].piece = "Rook";
+      cellsCopy[0][3].colorPiece = turn;
+    } else if (selected[1] + 2 === secondIndex) {
+      cellsCopy[0][7].piece = null;
+      cellsCopy[0][5].piece = "Rook";
+      cellsCopy[0][5].colorPiece = turn;
     }
+  }
+};
 
-    return false;
-  };
+export const checkPawnPromotion = (
+  cellsCopy: CellType[][],
+  firstIndex: number,
+  secondIndex: number,
+  turn: "white" | "black"
+) => {
+  if (
+    firstIndex === 0 &&
+    turn === "white" &&
+    cellsCopy[firstIndex][secondIndex].piece === "Pawn"
+  ) {
+    cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
+  }
+
+  if (
+    firstIndex === 7 &&
+    turn === "black" &&
+    cellsCopy[firstIndex][secondIndex].piece === "Pawn"
+  ) {
+    cellsCopy[firstIndex][secondIndex].isUpdatePice = true;
+  }
+};
+
+export const StatusPiece = (
+  selectedCell: CellType,
+  turn: "black" | "white",
+  updatedCells: CellType[][],
+  firstIndex: number,
+  secondIndex: number,
+  enemyColor: "black" | "white",
+  isAllow: boolean,
+  positionsCheckedPiece: PositionsCheckedPiece | undefined
+) => {
+  if (selectedCell.piece === "Pawn") {
+    const direction = turn === "black" ? 1 : -1;
+    const startRow = turn === "black" ? 1 : 6;
+    handlePawnMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      direction,
+      startRow,
+      enemyColor,
+      positionsCheckedPiece
+    );
+  } else if (selectedCell.piece === "Rook") {
+    handleRookMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      firstIndex - 1,
+      -1,
+      true,
+      -1,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Up
+    handleRookMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      firstIndex + 1,
+      8,
+      true,
+      1,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Down
+    handleRookMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      secondIndex + 1,
+      8,
+      false,
+      1,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Right
+    handleRookMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      secondIndex - 1,
+      -1,
+      false,
+      -1,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Left
+  } else if (selectedCell.piece === "Knight") {
+    handleKnightMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      turn,
+      positionsCheckedPiece
+    );
+  } else if (selectedCell.piece === "Bishop") {
+    handleBishopMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      -1,
+      -1,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Top-left
+    handleBishopMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      1,
+      1,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Bottom-right
+    handleBishopMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      1,
+      -1,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Bottom-left
+    handleBishopMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      -1,
+      1,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    ); // Top-right
+  } else if (selectedCell.piece === "Queen") {
+    handleQueenMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    );
+  } else if (selectedCell.piece === "King") {
+    handleKingMoves(
+      updatedCells,
+      firstIndex,
+      secondIndex,
+      isAllow,
+      turn,
+      enemyColor,
+      positionsCheckedPiece
+    );
+  } else {
+    return;
+  }
+};

@@ -1,4 +1,5 @@
 import {
+  CapturedPiecesType,
   CellType,
   PositionsCheckedPiece,
   StatusBishopOrQueenType,
@@ -837,14 +838,29 @@ export const movePiece = (
   selected: number[],
   firstIndex: number,
   secondIndex: number,
-  turn: "white" | "black"
+  turn: "white" | "black",
+  setCapturedPieces: React.Dispatch<React.SetStateAction<CapturedPiecesType[]>>
 ) => {
+  const capturedPiece = cellsCopy[firstIndex][secondIndex].piece;
+  const capturedColor = cellsCopy[firstIndex][secondIndex].colorPiece;
+
   cellsCopy[firstIndex][secondIndex].piece =
     cellsCopy[selected[0]][selected[1]].piece;
   cellsCopy[selected[0]][selected[1]].piece = null;
   cellsCopy[selected[0]][selected[1]].colorPiece = null;
   cellsCopy[firstIndex][secondIndex].colorPiece = turn;
   cellsCopy[firstIndex][secondIndex].isChange = true;
+
+  if (capturedPiece) {
+    setCapturedPieces(prev => [
+      ...prev,
+      {
+        type: capturedPiece,
+        color: capturedColor!,
+        
+      }
+    ]);
+  }
 };
 
 export const handleCastling = (

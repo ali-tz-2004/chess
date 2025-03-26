@@ -14,6 +14,11 @@ export interface CellType {
   isCheck: boolean;
 }
 
+export interface CapturedPiecesType {
+  type: keyof (typeof Images)["black"],
+  color: keyof typeof Images
+}
+
 export interface PositionsCheckedPiece {
   positionKing: number[];
   positionPiceCheck: number[];

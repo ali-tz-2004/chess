@@ -6,11 +6,14 @@ import { convertPawPiece } from "../data/Piece";
 import { Popup } from "./Popup";
 import useStoreState from "../hooks/useStoreState";
 import store from "storejs";
-import { CellType, PositionsCheckedPiece } from "../type/ChessTypes";
+import { CapturedPiecesType, CellType, PositionsCheckedPiece } from "../type/ChessTypes";
 import { checkForAllowMoves, checkPawnPromotion, checkUpdatePice, handleCastling, movePiece, StatusPiece, validAllowMove } from "../utils/Moves";
 import { clearMovesAndSelection } from "../utils/ClearMove";
 import { initialBase } from "../utils/InitialState";
 import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip } from "./Tooltip";
+import { PopupHistory } from "./PopupHistory";
+
 
 export const Chess = () => {
   const [cells, setCells] = useStoreState<CellType[][]>("cells", []);
@@ -21,6 +24,10 @@ export const Chess = () => {
   const [isClose, setIsClose] = useState(false);
   const [isEnd, setIsEnd] = useState(false);
   const [isEqual, setIsEqual] = useState(false);
+  const [capturedPieces, setCapturedPieces] = useStoreState<CapturedPiecesType[]>("capturedPieces", []);
+  const [historyDeletedBlack, setHistoryDeletedBlack] = useState(false);
+  const [historyDeletedWhite, setHistoryDeletedWhite] = useState(false);
+  const pieceHistory:("Pawn" | "Bishop" | "Knight" | "Queen" | "Rook")[] = ["Pawn", "Bishop", "Knight", "Rook", "Queen"];
 
   const countRow = 8;
   const countColumn = 8;
@@ -55,32 +62,33 @@ export const Chess = () => {
     isAllowMove: boolean,
     firstIndex: number,
     secondIndex: number
-  ): void => {
+): void => {
     if (isAllowMove) {
-      const cellsCopy = [...cells];
+        const cellsCopy = [...cells];
+        
+        updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
 
-      updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
+        movePiece(cellsCopy, selected, firstIndex, secondIndex, turn, setCapturedPieces);
 
-      movePiece(cellsCopy, selected, firstIndex, secondIndex, turn);
-      handleCastling(cellsCopy, selected, firstIndex, secondIndex, turn);
+        handleCastling(cellsCopy, selected, firstIndex, secondIndex, turn);
 
-      clearMovesAndSelection(cells, setCells);
+        clearMovesAndSelection(cells, setCells);
 
-      checkPawnPromotion(cellsCopy, firstIndex, secondIndex, turn);
+        checkPawnPromotion(cellsCopy, firstIndex, secondIndex, turn);
 
-      if (!isCheck(turn === "white" ? "black" : "white")) {
-        clearMovesAndSelection(cells, setCells, undefined, undefined, true);
-        setPositionsCheckedPiece(undefined);
-      }
+        if (!isCheck(turn === "white" ? "black" : "white")) {
+            clearMovesAndSelection(cells, setCells, undefined, undefined, true);
+            setPositionsCheckedPiece(undefined);
+        }
 
-      setCells(cellsCopy);
-      if (!cellsCopy[firstIndex][secondIndex].isUpdatePice) {
-        setTurn(turn === "white" ? "black" : "white");
-      }
+        setCells(cellsCopy);
+        if (!cellsCopy[firstIndex][secondIndex].isUpdatePice) {
+            setTurn(turn === "white" ? "black" : "white");
+        }
     } else if (cells[firstIndex][secondIndex].piece) {
-      setSelected([firstIndex, secondIndex]);
+        setSelected([firstIndex, secondIndex]);
     }
-  };
+};
 
   const updateMoveCount = (from: CellType, to: CellType) => {
     if (from.piece === "Pawn" || to.piece !== null) {
@@ -269,6 +277,7 @@ export const Chess = () => {
     setIsEnd(false);
     setIsEqual(false);
     setIsClose(false);
+    setCapturedPieces([]);
   }
 
   const closePopup = () => {
@@ -277,10 +286,18 @@ export const Chess = () => {
     setIsEqual(false);
   }
 
+  const popupHistoryDeletedBlack = () => {
+    setHistoryDeletedBlack(!historyDeletedBlack);
+  }
+
+  const popupHistoryDeletedWhite = () => {
+    setHistoryDeletedWhite(!historyDeletedWhite);
+  }
+
   return (
     <>
       <div
-        className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative `}
+        className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative select-none pointer-events-auto`}
       >
         {cells.map((cellChildren, firstIndex) =>
           cellChildren.map((x, secondIndex) => (
@@ -336,6 +353,28 @@ export const Chess = () => {
         )}
         <BorderChess />
 
+        <div className="w-16 h-16 absolute -top-16 right-0">
+          <Tooltip messageTooltip="deleted pieces" >
+            <div onClick={popupHistoryDeletedBlack} className="cursor-pointer">
+              <ChessPiece piece={"King"} color={"black"} />
+            </div>
+          </Tooltip>
+        </div>
+
+        <button
+          className="w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute -top-14 left-1/2 transform -translate-x-1/2"
+          onClick={resetGame}
+        >
+          reset game
+        </button>
+
+        <div className="w-16 h-16 absolute -top-16 left-0">
+          <Tooltip messageTooltip="deleted pieces" >
+            <div onClick={popupHistoryDeletedWhite}>
+              <ChessPiece piece={"King"} color={"white"} />
+            </div>
+          </Tooltip>
+        </div>
       </div>
 
       {(isEnd || isEqual) && (
@@ -357,9 +396,28 @@ export const Chess = () => {
           />
         </motion.div>
       )}
-      <button className="mt-4 w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute top-0" onClick={resetGame}>
-        reset game
-      </button>
+
+      {(historyDeletedBlack || historyDeletedWhite) && ( 
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center h-screen"
+        >
+          <PopupHistory onClose={historyDeletedBlack ? popupHistoryDeletedBlack : popupHistoryDeletedWhite}>
+            <div className="flex items-center justify-between">
+              {pieceHistory.map((x) => (
+                <div className="w-10 h-10 flex items-center justify-center" key={x}>
+                  <ChessPiece piece={x} color={historyDeletedBlack ? "white" : "black"} />
+                  <span className="text-red-300">
+                    {capturedPieces.filter(p => p.color === (historyDeletedBlack ? "white" : "black") && p.type === x).length}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </PopupHistory>
+        </motion.div>
+      )}
     </>
   );
 };

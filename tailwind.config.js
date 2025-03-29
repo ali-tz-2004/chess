@@ -11,12 +11,7 @@ module.exports = {
         cellPrimary: "#000",
         cellSecondary: "#ffffffe0"
       },
-      height:{
-        "custom-30": "30rem"
-      },
-      width:{
-        "custom-30": "30rem"
-      },
+
       gridRow:{
         8:"grid-template-rows: repeat(8, minmax(0, 1fr));"
       },

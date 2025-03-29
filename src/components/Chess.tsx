@@ -297,17 +297,21 @@ export const Chess = () => {
   return (
     <>
       <div
-        className={`h-custom-30 w-custom-30 bg-secondary grid grid-cols-8 grid-rows-8 p-8 2xl:scale-150 lg:scale-100 md:scale-50 scale-75 relative select-none pointer-events-auto`}
+        className="grid grid-cols-8 grid-rows-8 
+        2xl:w-[90vw] 2xl:h-[90vw] 2xl:max-w-[600px] 2xl:max-h-[600px]
+        w-[90vw] h-[90vw] max-w-[400px] max-h-[400px]
+        bg-secondary p-6 relative select-none pointer-events-auto"
       >
         {cells.map((cellChildren, firstIndex) =>
           cellChildren.map((x, secondIndex) => (
             <div
               key={x.id}
               className={`${x.bgColor
-                } w-full h-full flex items-center justify-center relative ${x.isAllowMove ? "cursor-pointer" : ""
+                } aspect-square w-full h-full flex items-center justify-center relative ${x.isAllowMove ? "cursor-pointer" : ""
                 } `}
               onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
             >
+            <BorderChess id={x.id} />
               {x.isAllowMove ? (
                 <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
               ) : null}
@@ -351,7 +355,6 @@ export const Chess = () => {
             </div>
           ))
         )}
-        <BorderChess />
 
         <div className="w-16 h-16 absolute -top-16 right-0">
           <Tooltip messageTooltip="deleted pieces" >

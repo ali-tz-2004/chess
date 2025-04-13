@@ -255,10 +255,12 @@ export const Chess = () => {
   }
 
   useEffect(() => {
-    const isStalemate = equalStalemate();
-    const isInsufficient = isInsufficientMaterial();
-
-    setIsEqual(isStalemate || isInsufficient);
+    if(cells.length > 0){
+      const isStalemate = equalStalemate();
+      const isInsufficient = isInsufficientMaterial();
+  
+      setIsEqual(isStalemate || isInsufficient);
+    }
   }, [setCells, turn]);
 
   useEffect(() => {

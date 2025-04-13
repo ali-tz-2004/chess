@@ -5,6 +5,11 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 
 ---
 
+## 🎮 Play Now
+
+[![Play Chess Online](https://img.shields.io/badge/🔗%20Play%20Chess%20Online-blue?style=for-the-badge)](https://chess.liara.run)
+
+
 ## 🧩 Features
 
 - ✅ Valid movement rules (King, Queen, Bishop, Knight, Rook, Pawn)

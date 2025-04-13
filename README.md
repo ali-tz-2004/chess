@@ -7,23 +7,20 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 
 ## 🧩 Features
 
-- ♟️ Full chessboard with drag & drop pieces
 - ✅ Valid movement rules (King, Queen, Bishop, Knight, Rook, Pawn)
 - 🚫 Illegal move prevention
 - ⏳ Turn-based play (White vs Black)
 - ♚ Check & Checkmate detection
 - 👑 Pawn Promotion
 - 🏰 Castling
-- ♻️ Undo last move
 - 🔄 Animated transitions with Framer Motion
-- ⚛️ Built with React Hooks + Context API
+- ⚛️ Built with React Hooks 
 - 💻 Clean and scalable code structure
 
 ---
 
-## 📸 Screenshots
-
-*(You can add screenshots by placing them in `public/screenshots/` and linking here)*
+![Chess Game Screenshot](public/chess.png)  
+*Gameplay between two players with full rule validation*
 
 ---
 
@@ -35,7 +32,6 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 | **TypeScript** | Type safety and better DX |
 | **Tailwind CSS** | Utility-first styling |
 | **Framer Motion** | Smooth animations |
-| **Context API** | State management |
 | **Custom Chess Logic** | All move rules written from scratch |
 
 ---

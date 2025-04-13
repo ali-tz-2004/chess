@@ -13,6 +13,7 @@ import { initialBase } from "../utils/InitialState";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip } from "./Tooltip";
 import { PopupHistory } from "./PopupHistory";
+import { RefreshIcon } from "../assets/icons/RefreshIcon";
 
 
 export const Chess = () => {
@@ -27,7 +28,7 @@ export const Chess = () => {
   const [capturedPieces, setCapturedPieces] = useStoreState<CapturedPiecesType[]>("capturedPieces", []);
   const [historyDeletedBlack, setHistoryDeletedBlack] = useState(false);
   const [historyDeletedWhite, setHistoryDeletedWhite] = useState(false);
-  const pieceHistory:("Pawn" | "Bishop" | "Knight" | "Queen" | "Rook")[] = ["Pawn", "Bishop", "Knight", "Rook", "Queen"];
+  const pieceHistory: ("Pawn" | "Bishop" | "Knight" | "Queen" | "Rook")[] = ["Pawn", "Bishop", "Knight", "Rook", "Queen"];
 
   const countRow = 8;
   const countColumn = 8;
@@ -62,33 +63,33 @@ export const Chess = () => {
     isAllowMove: boolean,
     firstIndex: number,
     secondIndex: number
-): void => {
+  ): void => {
     if (isAllowMove) {
-        const cellsCopy = [...cells];
-        
-        updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
+      const cellsCopy = [...cells];
 
-        movePiece(cellsCopy, selected, firstIndex, secondIndex, turn, setCapturedPieces);
+      updateMoveCount(cellsCopy[selected[0]][selected[1]], cellsCopy[firstIndex][secondIndex]);
 
-        handleCastling(cellsCopy, selected, firstIndex, secondIndex, turn);
+      movePiece(cellsCopy, selected, firstIndex, secondIndex, turn, setCapturedPieces);
 
-        clearMovesAndSelection(cells, setCells);
+      handleCastling(cellsCopy, selected, firstIndex, secondIndex, turn);
 
-        checkPawnPromotion(cellsCopy, firstIndex, secondIndex, turn);
+      clearMovesAndSelection(cells, setCells);
 
-        if (!isCheck(turn === "white" ? "black" : "white")) {
-            clearMovesAndSelection(cells, setCells, undefined, undefined, true);
-            setPositionsCheckedPiece(undefined);
-        }
+      checkPawnPromotion(cellsCopy, firstIndex, secondIndex, turn);
 
-        setCells(cellsCopy);
-        if (!cellsCopy[firstIndex][secondIndex].isUpdatePice) {
-            setTurn(turn === "white" ? "black" : "white");
-        }
+      if (!isCheck(turn === "white" ? "black" : "white")) {
+        clearMovesAndSelection(cells, setCells, undefined, undefined, true);
+        setPositionsCheckedPiece(undefined);
+      }
+
+      setCells(cellsCopy);
+      if (!cellsCopy[firstIndex][secondIndex].isUpdatePice) {
+        setTurn(turn === "white" ? "black" : "white");
+      }
     } else if (cells[firstIndex][secondIndex].piece) {
-        setSelected([firstIndex, secondIndex]);
+      setSelected([firstIndex, secondIndex]);
     }
-};
+  };
 
   const updateMoveCount = (from: CellType, to: CellType) => {
     if (from.piece === "Pawn" || to.piece !== null) {
@@ -294,6 +295,7 @@ export const Chess = () => {
     setHistoryDeletedWhite(!historyDeletedWhite);
   }
 
+
   return (
     <>
       <div
@@ -311,7 +313,7 @@ export const Chess = () => {
                 } `}
               onClick={() => movedHandler(x.isAllowMove, firstIndex, secondIndex)}
             >
-            <BorderChess id={x.id} />
+              <BorderChess id={x.id} />
               {x.isAllowMove ? (
                 <div className={`absolute w-2 h-2 bg-blue-400 rounded-xl`}></div>
               ) : null}
@@ -337,14 +339,14 @@ export const Chess = () => {
               </AnimatePresence>
 
               {x.isUpdatePice ? (
-                <div className="w-52 h-full absolute bg-secondary top-16 right-0 z-10 flex">
+                <div className="md:w-44 md:h-auto min-h-full absolute bg-secondary top-12 md:-right-12 z-10 md:flex">
                   {convertPawPiece.map((y, index) => (
                     <motion.div
                       onClick={() => updatePow(firstIndex, secondIndex, y)}
                       initial={{ opacity: 1 }}
                       exit={{ opacity: 0, scale: 0 }}
                       transition={{ duration: 0.1 }}
-                      className="pointer"
+                      className="pointer w-12"
                       key={index}
                     >
                       <ChessPiece piece={y} color={turn} />
@@ -356,27 +358,30 @@ export const Chess = () => {
           ))
         )}
 
-        <div className="w-16 h-16 absolute -top-16 right-0">
-          <Tooltip messageTooltip="deleted pieces" >
-            <div onClick={popupHistoryDeletedBlack} className="cursor-pointer">
-              <ChessPiece piece={"King"} color={"black"} />
-            </div>
-          </Tooltip>
-        </div>
-
         <button
-          className="w-24 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 absolute -top-14 left-1/2 transform -translate-x-1/2"
+          className="bg-blue-500 text-white p-2 rounded-lg hover:bg-blue-600 absolute -top-14 left-1/2 transform -translate-x-1/2"
           onClick={resetGame}
         >
-          reset game
+          <RefreshIcon />
         </button>
 
-        <div className="w-16 h-16 absolute -top-16 left-0">
-          <Tooltip messageTooltip="deleted pieces" >
-            <div onClick={popupHistoryDeletedWhite}>
-              <ChessPiece piece={"King"} color={"white"} />
-            </div>
-          </Tooltip>
+        <div className="absolute -top-14 left-0 right-0 flex justify-center space-x-4">
+          <div className="w-16 h-16 absolute -top-4 right-0">
+            <Tooltip messageTooltip="deleted pieces" >
+              <div onClick={popupHistoryDeletedBlack} className="cursor-pointer">
+                <ChessPiece piece={"King"} color={"black"} />
+              </div>
+            </Tooltip>
+          </div>
+
+          <div className="w-16 h-16 absolute -top-4 -left-5">
+            <Tooltip messageTooltip="deleted pieces" >
+              <div onClick={popupHistoryDeletedWhite}>
+                <ChessPiece piece={"King"} color={"white"} />
+              </div>
+            </Tooltip>
+          </div>
+
         </div>
       </div>
 
@@ -400,7 +405,7 @@ export const Chess = () => {
         </motion.div>
       )}
 
-      {(historyDeletedBlack || historyDeletedWhite) && ( 
+      {(historyDeletedBlack || historyDeletedWhite) && (
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}

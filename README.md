@@ -7,8 +7,7 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 
 ## 🎮 Play Now
 
-[![Play Chess Online](https://img.shields.io/badge/🔗%20Play%20Chess%20Online-blue?style=for-the-badge)](https://chess.liara.run)
-
+[![Play Chess Online](https://img.shields.io/badge/🔗%20Play%20Chess%20Online-blue?style=for-the-badge)](https://chess-git-master-alitz2004s-projects.vercel.app/)
 
 ## 🧩 Features
 
@@ -19,24 +18,24 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 - 👑 Pawn Promotion
 - 🏰 Castling
 - 🔄 Animated transitions with Framer Motion
-- ⚛️ Built with React Hooks 
+- ⚛️ Built with React Hooks
 - 💻 Clean and scalable code structure
 
 ---
 
 ![Chess Game Screenshot](public/chess.png)  
-*Gameplay between two players with full rule validation*
+_Gameplay between two players with full rule validation_
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Tool | Purpose |
-|------|---------|
-| **React** | UI framework |
-| **TypeScript** | Type safety and better DX |
-| **Tailwind CSS** | Utility-first styling |
-| **Framer Motion** | Smooth animations |
+| Tool                   | Purpose                             |
+| ---------------------- | ----------------------------------- |
+| **React**              | UI framework                        |
+| **TypeScript**         | Type safety and better DX           |
+| **Tailwind CSS**       | Utility-first styling               |
+| **Framer Motion**      | Smooth animations                   |
 | **Custom Chess Logic** | All move rules written from scratch |
 
 ---
@@ -44,6 +43,8 @@ Supports all the rules of chess including **check**, **checkmate**, **castling**
 ## 🚀 Getting Started
 
 1. Clone the repository:
+
 ```bash
 git clone https://github.com/ali-tz-2004/chess
 cd chess
+```

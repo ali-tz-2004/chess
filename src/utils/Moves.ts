@@ -366,7 +366,6 @@ export const handleQueenMoves = (
   enemyColor: "black" | "white",
   positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
-  debugger;
   handleRookMoves(
     updatedCells,
     firstIndex,
@@ -573,7 +572,6 @@ const checkDirection = (
   statusColumn: number,
   turn: "black" | "white",
 ): boolean => {
-  debugger;
   let rowIndex = firstIndex;
   let columnIndex = secondIndex;
   let tempVirtual: number[][] = [];

@@ -18,7 +18,7 @@ const lastCell = 8;
 export const isRookOrQueen = (
   updatedCells: CellType[][],
   row: number,
-  col: number
+  col: number,
 ) => {
   const piece = updatedCells[row][col].piece;
   return piece === "Rook" || piece === "Queen";
@@ -27,7 +27,7 @@ export const isRookOrQueen = (
 export const isBishopOrQueen = (
   updatedCells: CellType[][],
   row: number,
-  col: number
+  col: number,
 ) => {
   const piece = updatedCells[row][col].piece;
   return piece === "Bishop" || piece === "Queen";
@@ -55,7 +55,7 @@ export const handlePawnMoves = (
   direction: number,
   startRow: number,
   enemyColor: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
   const selectedCell = updatedCells[firstIndex][secondIndex];
 
@@ -70,13 +70,13 @@ export const handlePawnMoves = (
           updatedCells,
           firstIndex + direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         ) ||
         preventingCheckBishopOrQueen(
           updatedCells,
           firstIndex + direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         )
       ) {
         updatedCells[firstIndex + direction][secondIndex].isAllowMove =
@@ -87,13 +87,13 @@ export const handlePawnMoves = (
           updatedCells,
           firstIndex + 2 * direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         ) ||
         preventingCheckBishopOrQueen(
           updatedCells,
           firstIndex + 2 * direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         )
       ) {
         updatedCells[firstIndex + 2 * direction][secondIndex].isAllowMove =
@@ -114,13 +114,13 @@ export const handlePawnMoves = (
           updatedCells,
           firstIndex + direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         ) ||
         preventingCheckBishopOrQueen(
           updatedCells,
           firstIndex + direction,
           secondIndex,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         )
       ) {
         updatedCells[firstIndex + direction][secondIndex].isAllowMove =
@@ -176,7 +176,7 @@ export const handleRookMoves = (
   isRow: boolean,
   step: number,
   enemyColor: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
   const selectedCell = updatedCells[firstIndex][secondIndex];
 
@@ -196,13 +196,13 @@ export const handleRookMoves = (
           updatedCells,
           isRow ? i : firstIndex,
           isRow ? secondIndex : i,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         ) ||
         preventingCheckBishopOrQueen(
           updatedCells,
           isRow ? i : firstIndex,
           isRow ? secondIndex : i,
-          positionsCheckedPiece
+          positionsCheckedPiece,
         ) ||
         (rowPiceCheck === (isRow ? i : firstIndex) &&
           colPiceCheck === (isRow ? secondIndex : i))
@@ -222,7 +222,7 @@ export const handleKnightMoves = (
   firstIndex: number,
   secondIndex: number,
   turn: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
   const selectedCell = updatedCells[firstIndex][secondIndex];
 
@@ -257,13 +257,13 @@ export const handleKnightMoves = (
             updatedCells,
             newRow,
             newCol,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           preventingCheckBishopOrQueen(
             updatedCells,
             newRow,
             newCol,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           (rowPiceCheck === newRow && colPiceCheck === newCol)
         ) {
@@ -284,7 +284,7 @@ export const handleBishopMoves = (
   colStep: number,
   turn: "black" | "white",
   enemyColor: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
   let row = firstIndex;
   let col = secondIndex;
@@ -311,13 +311,13 @@ export const handleBishopMoves = (
             updatedCells,
             row,
             col,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           preventingCheckBishopOrQueen(
             updatedCells,
             row,
             col,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           (rowPiceCheck === row && colPiceCheck === col)
         ) {
@@ -338,13 +338,13 @@ export const handleBishopMoves = (
             updatedCells,
             row,
             col,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           preventingCheckBishopOrQueen(
             updatedCells,
             row,
             col,
-            positionsCheckedPiece
+            positionsCheckedPiece,
           ) ||
           (rowPiceCheck === row && colPiceCheck === col)
         ) {
@@ -364,8 +364,9 @@ export const handleQueenMoves = (
   isAllow: boolean,
   turn: "black" | "white",
   enemyColor: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
+  debugger;
   handleRookMoves(
     updatedCells,
     firstIndex,
@@ -376,7 +377,7 @@ export const handleQueenMoves = (
     true,
     -1,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Up
   handleRookMoves(
     updatedCells,
@@ -388,7 +389,7 @@ export const handleQueenMoves = (
     true,
     1,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Down
   handleRookMoves(
     updatedCells,
@@ -400,7 +401,7 @@ export const handleQueenMoves = (
     false,
     1,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Right
   handleRookMoves(
     updatedCells,
@@ -412,7 +413,7 @@ export const handleQueenMoves = (
     false,
     -1,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Left
 
   handleBishopMoves(
@@ -423,7 +424,7 @@ export const handleQueenMoves = (
     -1,
     turn,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Top-left
   handleBishopMoves(
     updatedCells,
@@ -433,7 +434,7 @@ export const handleQueenMoves = (
     1,
     turn,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Bottom-right
   handleBishopMoves(
     updatedCells,
@@ -443,7 +444,7 @@ export const handleQueenMoves = (
     -1,
     turn,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Bottom-left
   handleBishopMoves(
     updatedCells,
@@ -453,7 +454,7 @@ export const handleQueenMoves = (
     1,
     turn,
     enemyColor,
-    positionsCheckedPiece
+    positionsCheckedPiece,
   ); // Top-right
 };
 
@@ -464,7 +465,7 @@ export const handleKingMoves = (
   isAllow: boolean,
   turn: "black" | "white",
   enemyColor: "black" | "white",
-  positionsCheckedPiece?: PositionsCheckedPiece | undefined
+  positionsCheckedPiece?: PositionsCheckedPiece | undefined,
 ) => {
   const selectedCell = updatedCells[firstIndex][secondIndex];
 
@@ -524,7 +525,7 @@ export const handleKingMoves = (
             firstIndex,
             secondIndex - 2,
             enemyColor,
-            turn
+            turn,
           )
         ) {
           updatedCells[firstIndex][secondIndex - 2].isAllowMove =
@@ -549,7 +550,7 @@ export const handleKingMoves = (
             firstIndex,
             secondIndex + 2,
             enemyColor,
-            turn
+            turn,
           )
         ) {
           updatedCells[firstIndex][secondIndex + 2].isAllowMove =
@@ -570,8 +571,9 @@ const checkDirection = (
   secondIndex: number,
   statusRow: number,
   statusColumn: number,
-  turn: "black" | "white"
+  turn: "black" | "white",
 ): boolean => {
+  debugger;
   let rowIndex = firstIndex;
   let columnIndex = secondIndex;
   let tempVirtual: number[][] = [];
@@ -604,7 +606,7 @@ const checkDirection = (
     const cell = updatedCells[rowIndex][columnIndex];
     if (cell?.colorPiece) {
       if (cell.piece === "King" && cell.colorPiece === turn) {
-        temp = temp.concat(tempVirtual);
+        temp.push(...tempVirtual);
         return true;
       }
       break;
@@ -627,7 +629,7 @@ const resolveDirection = (
   isRookOrQueenProp: boolean = false,
   turn: "black" | "white",
   cells: CellType[][],
-  setCells: (cells: CellType[][]) => void
+  setCells: (cells: CellType[][]) => void,
 ): boolean => {
   let row = firstIndex;
   let column = secondIndex;
@@ -673,7 +675,7 @@ export const validAllowMove = (
   status: boolean,
   turn: "black" | "white",
   cells: CellType[][],
-  setCells: (cells: CellType[][]) => void
+  setCells: (cells: CellType[][]) => void,
 ): boolean => {
   let statusBishopOrQueen: StatusBishopOrQueenType = null;
   let statusRookOrQueen: StatusRookOrQueenType = null;
@@ -725,7 +727,7 @@ export const validAllowMove = (
         false,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "topRight":
       return resolveDirection(
@@ -739,7 +741,7 @@ export const validAllowMove = (
         false,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "bottomLeft":
       return resolveDirection(
@@ -753,7 +755,7 @@ export const validAllowMove = (
         false,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "bottomRight":
       return resolveDirection(
@@ -767,7 +769,7 @@ export const validAllowMove = (
         false,
         turn,
         cells,
-        setCells
+        setCells,
       );
   }
 
@@ -784,7 +786,7 @@ export const validAllowMove = (
         true,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "right":
       return resolveDirection(
@@ -798,7 +800,7 @@ export const validAllowMove = (
         true,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "top":
       return resolveDirection(
@@ -812,7 +814,7 @@ export const validAllowMove = (
         true,
         turn,
         cells,
-        setCells
+        setCells,
       );
     case "bottom":
       return resolveDirection(
@@ -826,7 +828,7 @@ export const validAllowMove = (
         true,
         turn,
         cells,
-        setCells
+        setCells,
       );
   }
 
@@ -839,7 +841,7 @@ export const movePiece = (
   firstIndex: number,
   secondIndex: number,
   turn: "white" | "black",
-  setCapturedPieces: React.Dispatch<React.SetStateAction<CapturedPiecesType[]>>
+  setCapturedPieces: React.Dispatch<React.SetStateAction<CapturedPiecesType[]>>,
 ) => {
   const capturedPiece = cellsCopy[firstIndex][secondIndex].piece;
   const capturedColor = cellsCopy[firstIndex][secondIndex].colorPiece;
@@ -852,13 +854,12 @@ export const movePiece = (
   cellsCopy[firstIndex][secondIndex].isChange = true;
 
   if (capturedPiece) {
-    setCapturedPieces(prev => [
+    setCapturedPieces((prev) => [
       ...prev,
       {
         type: capturedPiece,
         color: capturedColor!,
-        
-      }
+      },
     ]);
   }
 };
@@ -868,7 +869,7 @@ export const handleCastling = (
   selected: number[],
   firstIndex: number,
   secondIndex: number,
-  turn: "white" | "black"
+  turn: "white" | "black",
 ) => {
   if (turn === "white" && cellsCopy[firstIndex][secondIndex].piece === "King") {
     if (selected[1] - 2 === secondIndex) {
@@ -899,7 +900,7 @@ export const checkPawnPromotion = (
   cellsCopy: CellType[][],
   firstIndex: number,
   secondIndex: number,
-  turn: "white" | "black"
+  turn: "white" | "black",
 ) => {
   if (
     firstIndex === 0 &&
@@ -926,7 +927,7 @@ export const StatusPiece = (
   secondIndex: number,
   enemyColor: "black" | "white",
   isAllow: boolean,
-  positionsCheckedPiece: PositionsCheckedPiece | undefined
+  positionsCheckedPiece: PositionsCheckedPiece | undefined,
 ) => {
   if (selectedCell.piece === "Pawn") {
     const direction = turn === "black" ? 1 : -1;
@@ -938,7 +939,7 @@ export const StatusPiece = (
       direction,
       startRow,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     );
   } else if (selectedCell.piece === "Rook") {
     handleRookMoves(
@@ -951,7 +952,7 @@ export const StatusPiece = (
       true,
       -1,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Up
     handleRookMoves(
       updatedCells,
@@ -963,7 +964,7 @@ export const StatusPiece = (
       true,
       1,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Down
     handleRookMoves(
       updatedCells,
@@ -975,7 +976,7 @@ export const StatusPiece = (
       false,
       1,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Right
     handleRookMoves(
       updatedCells,
@@ -987,7 +988,7 @@ export const StatusPiece = (
       false,
       -1,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Left
   } else if (selectedCell.piece === "Knight") {
     handleKnightMoves(
@@ -995,7 +996,7 @@ export const StatusPiece = (
       firstIndex,
       secondIndex,
       turn,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     );
   } else if (selectedCell.piece === "Bishop") {
     handleBishopMoves(
@@ -1006,7 +1007,7 @@ export const StatusPiece = (
       -1,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Top-left
     handleBishopMoves(
       updatedCells,
@@ -1016,7 +1017,7 @@ export const StatusPiece = (
       1,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Bottom-right
     handleBishopMoves(
       updatedCells,
@@ -1026,7 +1027,7 @@ export const StatusPiece = (
       -1,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Bottom-left
     handleBishopMoves(
       updatedCells,
@@ -1036,7 +1037,7 @@ export const StatusPiece = (
       1,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     ); // Top-right
   } else if (selectedCell.piece === "Queen") {
     handleQueenMoves(
@@ -1046,7 +1047,7 @@ export const StatusPiece = (
       isAllow,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     );
   } else if (selectedCell.piece === "King") {
     handleKingMoves(
@@ -1056,7 +1057,7 @@ export const StatusPiece = (
       isAllow,
       turn,
       enemyColor,
-      positionsCheckedPiece
+      positionsCheckedPiece,
     );
   } else {
     return;

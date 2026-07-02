@@ -203,6 +203,9 @@ export const Chess = () => {
   }, [setCells, positionsCheckedPiece])
 
   const equalStalemate = () => {
+    if (cells.some(row => row.some(cell => cell.isUpdatePice))) {
+      return false;
+    }
     for (let i = 0; i < 8; i++) {
       for (let j = 0; j < 8; j++) {
         if (cells[i][j]?.colorPiece === turn) {
@@ -341,14 +344,14 @@ export const Chess = () => {
               </AnimatePresence>
 
               {x.isUpdatePice ? (
-                <div className="md:w-44 md:h-auto min-h-full absolute bg-secondary top-12 md:-right-12 z-10 md:flex">
+                <div className="2xl:w-[16rem] md:w-44 absolute bg-secondary 2xl:top-[4.2rem] md:top-11 top-9 md:-right-12 z-10 md:flex">
                   {convertPawPiece.map((y, index) => (
                     <motion.div
                       onClick={() => updatePow(firstIndex, secondIndex, y)}
                       initial={{ opacity: 1 }}
                       exit={{ opacity: 0, scale: 0 }}
                       transition={{ duration: 0.1 }}
-                      className="pointer w-12"
+                      className="pointer size-100% md:w-1/4 md:h-1/4 flex items-center justify-center cursor-pointer hover:bg-blue-500"
                       key={index}
                     >
                       <ChessPiece piece={y} color={turn} />
